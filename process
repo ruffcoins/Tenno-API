@@ -1,0 +1,5 @@
+create the database model
+Create route
+create the controller
+register the route in app.js
+register the model and relationships if any in the sequelize
