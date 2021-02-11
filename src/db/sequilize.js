@@ -24,15 +24,15 @@ db.user = require('../models/users')(sequelize, Sequelize);
 db.owner = require('../models/owners')(sequelize, Sequelize);
 db.properties = require('../models/properties')(sequelize, Sequelize);
 db.rooms = require('../models/rooms')(sequelize, Sequelize);
-db.occupant = require('../models/occupants')(sequelize, Sequelize);
+db.tenant = require('../models/tenants')(sequelize, Sequelize);
 
 
 
 // database relationships
-db.owner.hasMany(db.properties);
-db.properties.belongsTo(db.owner, {foreignKey: 'owner_id'});
-db.rooms.belongsTo(db.properties, {foreignKey: 'property_id'});
-db.occupant.hasOne(db.rooms, {foreignKey: 'occupant_id'});
+db.owner.hasMany(db.properties, { onDelete: 'cascade' });
+db.properties.belongsTo(db.owner, {foreignKey: 'owner_id', onDelete: 'cascade'});
+db.rooms.belongsTo(db.properties, {foreignKey: 'property_id', onDelete: 'cascade'});
+db.tenant.hasOne(db.rooms, {foreignKey: 'tenant_id'});
 
 
  db.sequelize.sync();

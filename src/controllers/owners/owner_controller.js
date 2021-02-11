@@ -2,8 +2,38 @@ const db = require('../../db/sequilize');
 const Sequelize = require('sequelize');
 const Owner = db.owner;
 const { errorResponse, successResponse } = require('../../utils/responses');
+const owners = require('../../models/owners');
+// const owners = require('../../models/owners');
 
 class OwnerController{
+
+
+    static async getAllOwners(req, res){
+        let offset = parseInt(req.query.skip);
+       
+        Owner.findAndCountAll({
+            attributes: ['id', 'name', 'phone'],
+            limit: 10,
+            offset: offset
+        }).then(owners => {
+            return successResponse(
+                true,
+                owners,
+                undefined,
+                res
+            );
+        }).catch(err => {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        });
+    }
+
     static async create(req,res){
         try {
             const owner = await Owner.create({
@@ -45,7 +75,7 @@ class OwnerController{
                 res
 
             );
-        })
+        });
     }
 
     static async updateOwner(req, res) {
@@ -95,5 +125,6 @@ module.exports = {
     createOwner: OwnerController.create,
     showOwner: OwnerController.showOwner,
     updateOwner: OwnerController.updateOwner,
-    deleteOwner: OwnerController.deleteOwner
+    deleteOwner: OwnerController.deleteOwner,
+    getAllOwners: OwnerController.getAllOwners
 };

@@ -12,24 +12,21 @@ module.exports = (sequelize, Sequelize) => {
         updatedAt: {
             field: 'updated_at',
             type: Sequelize.DATE,
-        },propertyId: {
-            field: 'property_id',
+        },
+        property_id: {
             type: Sequelize.BIGINT(20),
             allowNull: false,
             validate: {
                 notNull: { msg: "property_id is required" },
             },
         },
-        occupantId: {
-            field: 'occupant_id',
+        tenant_id: {
             type: Sequelize.BIGINT(20),
         },
-        roomType: {
-            field: 'room_type',
+        room_type: {
             type: Sequelize.STRING
         },
-        roomName: {
-            field: 'room_name',
+        room_name: {
             type: Sequelize.STRING,
             allowNull: false,
             validate: {
@@ -42,10 +39,10 @@ module.exports = (sequelize, Sequelize) => {
         duration: {
             type: Sequelize.STRING
         },
-        startDate: {
+        start_date: {
             type: Sequelize.DATE
         },
-        endDate: {
+        end_date: {
             type: Sequelize.DATE
         },
         available: {

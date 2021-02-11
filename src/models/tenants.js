@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) =>{
-    return sequelize.define('occupants', {
+    return sequelize.define('tenants', {
         id:{
             type: Sequelize.BIGINT(20),
             primaryKey: true,
@@ -13,22 +13,24 @@ module.exports = (sequelize, Sequelize) =>{
             field: 'updated_at',
             type: Sequelize.DATE,
         },
-        firstName:{
-            field: 'first_name',
+        first_name:{
             type: Sequelize.STRING
         },
-        lastName: {
-            field: 'last_name',
+        last_name: {
             type: Sequelize.STRING
         },
-        phone: {
-            type: Sequelize.STRING
+        phone_number: {
+            type: Sequelize.STRING,
+            unique: true,
+            allowNull:false,
+            validate: {
+                notNull: { msg: "phone_number is required" },
+            },
         },
         occupation: {
             type: Sequelize.STRING
         },
-        maritalStatus: {
-            field: 'marital_status',
+        marital_status: {
             type: Sequelize.STRING
         },
         sex: {

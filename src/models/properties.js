@@ -16,18 +16,19 @@ module.exports = (sequelize, Sequelize) =>{
         address:{
             type: Sequelize.STRING
         },
-        ownerId: {
-            field: 'owner_id',
+        owner_id: {
             type: Sequelize.BIGINT(20),
             allowNull:false,
             validate: {
                 notNull: { msg: "owner_id is required" },
             },
         },
-        noOfRooms: {
-            field: 'no_of_rooms',
+        no_of_rooms: {
             type: Sequelize.INTEGER,
             allowNull: true,
+        },
+        description: {
+            type: Sequelize.TEXT
         }
     },{
         timestamps: true,
