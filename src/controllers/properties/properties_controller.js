@@ -38,7 +38,7 @@ class PropertiesController{
             // If owner is found, create property using the owner id
             Property.create({
                 address: req.body.address,
-                owner_id: owner.id,
+                ownerId: owner.id,
                 no_of_rooms: req.body.no_of_rooms,
                 description: req.body.description
             }).then((property) => {
@@ -67,15 +67,16 @@ class PropertiesController{
                 }
 
                 return successResponse(true, 'successful', null, res);
-            }).catch((error)=>{
-                return errorResponse(
-                    false,
-                    'Something went wrong',
-                    error.toString(),
-                    500,
-                    res
-    
-                );
+            }).catch((err)=>{
+                if(err instanceof Sequelize.ValidationError){
+                    return errorResponse(
+                        false,
+                        'Duplicate property address',
+                        err.errors[0].message,
+                        401,
+                        res
+                    );
+                }
             });
 
             
@@ -134,23 +135,25 @@ class PropertiesController{
         }
     }
 
-    static async getOwnerProperties(req, res) {
 
-        Property.findAndCountAll({
-            attributes: ['id', 'address', 'no_of_rooms', 'description'],
-        },
-        {
-            where: {
-                owner_id: req.body.owner_id
-            }
-        }).then(properties => {
+    static async getAnOwnersProperties(req, res) {
+
+        try {
+            const ownerProperty = await Owner.findAll({
+                include: Property,
+                where: {
+                    id: req.body.id
+                }
+            });
+
             return successResponse(
                 true,
-                properties,
+                ownerProperty[0].properties,
                 undefined,
                 res
             );
-        }).catch(err => {
+            
+        }catch (err) {
             return errorResponse(
                 false,
                 'Something went wrong',
@@ -159,7 +162,7 @@ class PropertiesController{
                 res
 
             );
-        });
+        }
 
     }
 
@@ -200,6 +203,6 @@ module.exports = {
     createProperty: PropertiesController.createProperty,
     showProperty: PropertiesController.showProperty,
     deleteProperty: PropertiesController.deleteProperty,
-    getOwnerProperties: PropertiesController.getOwnerProperties,
+    getAnOwnersProperties: PropertiesController.getAnOwnersProperties,
     getAvailablePropertyRooms: PropertiesController.getAvailablePropertyRooms
 };

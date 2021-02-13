@@ -30,7 +30,7 @@ class TenantController{
 
             const property = await Property.findOne({
                 where: {
-                    owner_id: owner.id,
+                    ownerId: owner.id,
                     address: req.body.address
                 }
             });
@@ -141,16 +141,20 @@ class TenantController{
             });
 
             if (findRoom) {
-                const room = Room.update(
+                Room.update(
                     {
                         start_date: req.body.start_date,
                         end_date: req.body.end_date,
                         duration: req.body.duration,
                         amount: req.body.amount
-                    },
-                    { where: { id: findRoom.id } }
-                ).then(room => {
-                    Tenant.update(
+                    }, {
+                      
+                         where: { id: findRoom.id },
+                    
+                        }
+                ).then(async(room)=>{
+                   
+                    await Tenant.update(
                         {
                             first_name: req.body.first_name,
                             last_name: req.body.last_name,
@@ -159,7 +163,7 @@ class TenantController{
                             marital_status: req.body.marital_status,
                             sex: req.body.sex
                         },
-                        { where: { id: room.tenant_id } }
+                        { where: { id: findRoom.tenant_id } }
                     );
                 });
             }
@@ -178,10 +182,53 @@ class TenantController{
         }
     }
 
+    static async deleteTenant(req, res) {
+        try {
+
+            const findTenant = await Tenant.findOne({
+                where:{id: req.params.id}
+            });
+
+            if (findTenant) {
+                const tenantRoomId = await findTenant.getRoom({
+                    attributes: ['id']
+                });
+
+
+                await Room.update(
+                    {
+                        available: true,
+                        tenant_id: null,
+                        amount: null,
+                        duration: null,
+                        start_date: null,
+                        end_date: null
+                    },
+                    { where: { id: tenantRoomId.id } }
+                );
+
+                await Tenant.destroy(
+                    { where: { id: req.params.id } }
+                );                
+            }
+
+            return successResponse(true, "Tenant deleted successfully", null, res);
+        }catch (err) {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+            );
+        }
+    }
+
 }
 
 module.exports = {
     createTenant: TenantController.createTenant,
     showRoom: TenantController.showRoom,
-    updateTenant: TenantController.updateTenant
+    updateTenant: TenantController.updateTenant,
+    deleteTenant: TenantController.deleteTenant
 };

@@ -14,13 +14,11 @@ module.exports = (sequelize, Sequelize) =>{
             type: Sequelize.DATE,
         },
         address:{
-            type: Sequelize.STRING
-        },
-        owner_id: {
-            type: Sequelize.BIGINT(20),
+            type: Sequelize.STRING,
+            unique: true,
             allowNull:false,
             validate: {
-                notNull: { msg: "owner_id is required" },
+                notNull: { msg: "address is required" },
             },
         },
         no_of_rooms: {

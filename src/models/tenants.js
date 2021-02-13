@@ -35,7 +35,12 @@ module.exports = (sequelize, Sequelize) =>{
         },
         sex: {
             type: Sequelize.STRING
-        },      
+        },
+        active: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
+        }
     },{
         timestamps: true,
         freezeTableName: true,
