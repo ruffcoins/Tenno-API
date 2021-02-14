@@ -3,7 +3,6 @@ const Sequelize = require('sequelize');
 const Owner = db.owner;
 const { errorResponse, successResponse } = require('../../utils/responses');
 const owners = require('../../models/owners');
-// const owners = require('../../models/owners');
 
 class OwnerController{
 

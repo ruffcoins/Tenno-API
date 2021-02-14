@@ -18,6 +18,8 @@ const getAvailablePropertyRooms = require('./src/routes/properties/property_rout
 const showRoom = require('./src/routes/tenants/tenant_route');
 const updateTenant = require('./src/routes/tenants/tenant_route');
 const deleteTenant = require('./src/routes/tenants/tenant_route');
+const dashboard = require('./src/routes/dashboard/dashboard_route');
+const createOrganization = require('./src/routes/settings/settings_route');
 
 
 
@@ -50,8 +52,9 @@ app.use(getAnOwnersProperty);
 app.use(getAvailablePropertyRooms);
 app.use(showRoom);
 app.use(updateTenant);
-app.use(deleteTenant)
-
+app.use(deleteTenant);
+app.use(dashboard);
+app.use(createOrganization);
 
 
 module.exports = app;

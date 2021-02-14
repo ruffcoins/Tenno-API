@@ -25,6 +25,7 @@ db.owner = require('../models/owners')(sequelize, Sequelize);
 db.properties = require('../models/properties')(sequelize, Sequelize);
 db.rooms = require('../models/rooms')(sequelize, Sequelize);
 db.tenant = require('../models/tenants')(sequelize, Sequelize);
+db.settings = require('../models/settings')(sequelize, Sequelize);
 
 
 
