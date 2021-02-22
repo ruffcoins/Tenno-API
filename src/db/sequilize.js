@@ -38,7 +38,7 @@ db.tenant.hasOne(db.rooms, {foreignKey: 'tenant_id'});
 db.notifications.belongsTo(db.rooms);
 
 
- db.sequelize.sync({force:true});
+ db.sequelize.sync();
 // {force:true}
 db.sequelize
     .authenticate()
