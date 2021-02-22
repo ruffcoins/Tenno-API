@@ -22,10 +22,10 @@
     "mysql2": "^2.1.0",
     "node-cron": "^2.0.3",
     "sequelize": "^6.3.3",
-    "validator": "^13.1.1"
+    "validator": "^13.1.1",
+    "env-cmd": "^10.1.0"
   },
   "devDependencies": {
-    "env-cmd": "^10.1.0",
     "nodemon": "^2.0.4"
   }
 }
