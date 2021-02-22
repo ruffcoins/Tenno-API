@@ -95,7 +95,6 @@ class TenantController{
         }
     }
 
-
     // Read
     static async showRoom(req, res){
 

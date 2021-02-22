@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize("tenno", "root", "", {
+
+const sequelize = new Sequelize(process.env.database, process.env.username, process.env.password, {
     host: process.env.host,
     dialect: 'mysql',
     dialectOptions: {
@@ -14,7 +15,6 @@ const sequelize = new Sequelize("tenno", "root", "", {
     }
 });
 
-
 const db = {};
 
 db.Sequelize = Sequelize;
@@ -26,17 +26,19 @@ db.properties = require('../models/properties')(sequelize, Sequelize);
 db.rooms = require('../models/rooms')(sequelize, Sequelize);
 db.tenant = require('../models/tenants')(sequelize, Sequelize);
 db.settings = require('../models/settings')(sequelize, Sequelize);
+db.notifications = require('../models/notifications')(sequelize, Sequelize);
 
 
 
 // database relationships
 db.owner.hasMany(db.properties, { onDelete: 'cascade' });
-db.properties.belongsTo(db.owner, {foreignKey: 'owner_id', onDelete: 'cascade'});
+db.properties.belongsTo(db.owner);
 db.rooms.belongsTo(db.properties, {foreignKey: 'property_id', onDelete: 'cascade'});
 db.tenant.hasOne(db.rooms, {foreignKey: 'tenant_id'});
+db.notifications.belongsTo(db.rooms);
 
 
- db.sequelize.sync();
+ db.sequelize.sync({force:true});
 // {force:true}
 db.sequelize
     .authenticate()

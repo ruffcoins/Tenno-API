@@ -4,6 +4,7 @@
   "description": "A property management application",
   "main": "app.js",
   "scripts": {
+    "start": "env-cmd -f ./config/prod.env nodemon ./bin/www -e js,hbs",
     "dev": "env-cmd -f ./config/dev.env nodemon ./bin/www -e js,hbs"
   },
   "keywords": [

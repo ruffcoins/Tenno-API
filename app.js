@@ -20,18 +20,22 @@ const updateTenant = require('./src/routes/tenants/tenant_route');
 const deleteTenant = require('./src/routes/tenants/tenant_route');
 const dashboard = require('./src/routes/dashboard/dashboard_route');
 const createOrganization = require('./src/routes/settings/settings_route');
+// const oneMonthToExpiryDate = require('./src/routes/notifications/notifications_route')
 
 
 
 require('./src/db/sequilize');
 const db = require('./src/db/sequilize');
-// const { getAllOwners } = require('./src/controllers/owners/owner_controller');
 const { request } = require('express');
-// const { deleteOwner } = require('./src/controllers/owners/owner_controller');
-// const { updateOwner } = require('./src/controllers/owners/owner_controller');
 
 
 const app = express();
+
+const NotificationsCron = require('./src/crons/notifications_cron');
+
+
+let notificationsCron = new NotificationsCron();
+
 
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -55,6 +59,11 @@ app.use(updateTenant);
 app.use(deleteTenant);
 app.use(dashboard);
 app.use(createOrganization);
+// app.use(oneMonthToExpiryDate);
 
+
+//CronJobs
+// notificationsCron.oneMonthToExpiryDate();
+// loanCron.checkDailyInterest();
 
 module.exports = app;
