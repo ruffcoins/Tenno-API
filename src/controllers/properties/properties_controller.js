@@ -145,13 +145,24 @@ class PropertiesController{
                     id: req.body.id
                 }
             });
+            console.log(ownerProperty);
 
-            return successResponse(
-                true,
-                ownerProperty[0].properties,
-                undefined,
-                res
-            );
+            if (ownerProperty.length == 0) {
+                return successResponse(
+                    false,
+                    "Owner doesn't exist",
+                    null,
+                    res
+                );
+            } else {
+                return successResponse(
+                    true,
+                    ownerProperty[0].properties,
+                    null,
+                    res
+                );
+            }
+            
             
         }catch (err) {
             return errorResponse(
