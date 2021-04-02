@@ -145,7 +145,6 @@ class PropertiesController{
                     id: req.body.id
                 }
             });
-            console.log(ownerProperty);
 
             if (ownerProperty.length == 0) {
                 return successResponse(
