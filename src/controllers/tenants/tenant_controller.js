@@ -7,9 +7,34 @@ const Tenant = db.tenant;
 const { errorResponse, successResponse } = require('../../utils/responses');
 const { request } = require('../../../app');
 const { tenant } = require('../../db/sequilize');
+const tenants = require('../../models/tenants');
 
 class TenantController{
     
+    // Get all tenants
+    static async getAllTenants(req, res){
+       
+        Tenant.findAndCountAll({
+            attributes: ['id', 'first_name', 'last_name', 'phone_number', 'occupation', 'marital_status', 'sex', 'active'],
+        }).then(tenants => {
+            return successResponse(
+                true,
+                tenants,
+                undefined,
+                res
+            );
+        }).catch(err => {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        });
+    }
+
     // Create
     static async createTenant(req, res) {
 
@@ -229,5 +254,6 @@ module.exports = {
     createTenant: TenantController.createTenant,
     showRoom: TenantController.showRoom,
     updateTenant: TenantController.updateTenant,
-    deleteTenant: TenantController.deleteTenant
+    deleteTenant: TenantController.deleteTenant,
+    getAllTenants: TenantController.getAllTenants 
 };
