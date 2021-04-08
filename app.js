@@ -20,7 +20,7 @@ const updateTenant = require('./src/routes/tenants/tenant_route');
 const deleteTenant = require('./src/routes/tenants/tenant_route');
 const dashboard = require('./src/routes/dashboard/dashboard_route');
 const createOrganization = require('./src/routes/settings/settings_route');
-// const oneMonthToExpiryDate = require('./src/routes/notifications/notifications_route')
+const showAllNotifications = require('./src/routes/notifications/notifications_route')
 
 
 
@@ -59,7 +59,7 @@ app.use(updateTenant);
 app.use(deleteTenant);
 app.use(dashboard);
 app.use(createOrganization);
-// app.use(oneMonthToExpiryDate);
+app.use(showAllNotifications);
 
 
 //CronJobs

@@ -34,7 +34,7 @@ class DashboardController {
         });
         const roomCount = roomList.count;
         
-        
+        // tenants
         const tenantList = await Tenant.findAndCountAll({
             
         });

@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const {
-    oneMonthToExpiryDate
+    showAllNotifications
     
 } = require('../../controllers/notifications/notifications_controller');
 
 
-router.get('/api/tenno/notifications/', oneMonthToExpiryDate);
+router.get('/api/tenno/notifications/showAll', showAllNotifications);
 // router.get('/api/tenno/owner/show/:id', showOwner);
 // router.put('/api/tenno/owner/update/:id', updateOwner);
 // router.delete('/api/tenno/owner/delete/:id', deleteOwner);
