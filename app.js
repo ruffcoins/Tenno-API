@@ -31,10 +31,10 @@ const { request } = require('express');
 
 const app = express();
 
-const NotificationsCron = require('./src/crons/notifications_cron');
+// const NotificationsCron = require('./src/crons/notifications_cron');
 
 
-let notificationsCron = new NotificationsCron();
+// let notificationsCron = new NotificationsCron();
 
 
 app.use(express.json());

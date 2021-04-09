@@ -17,10 +17,13 @@ module.exports = (sequelize, Sequelize) =>{
             type: Sequelize.STRING
         },
         body: {
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
+            unique: true,
         },
         completed: {
-            type: Sequelize.BOOLEAN
+            type: Sequelize.BOOLEAN,
+            defaultValue: false,
+            allowNull: false,
         }
     },{
         timestamps: true,
