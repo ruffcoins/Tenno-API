@@ -3,6 +3,7 @@ const db = require('../../db/sequilize');
 const Sequelize = require('sequelize');
 const Room = db.rooms;
 const Notification = db.notifications;
+const Notice = db.notice;
 const { errorResponse, successResponse } = require('../../utils/responses');
 
 class NotificationsController {
@@ -72,12 +73,12 @@ class NotificationsController {
                                     body: expiry,
                                     roomId: room.id
                                 });
-                                                      
+
                             } else if (remainingTime <= 14 && remainingTime > 0) {
 
                                 let expiry = `${room.room_name}\'s rent is expiring in 14 days`;
                                 noticeList.push(expiry);
-                                
+
                                 const notification = Notification.create({
                                     title: "2 weeks notice",
                                     body: expiry,
@@ -88,7 +89,7 @@ class NotificationsController {
 
                                 let expiry = `${room.room_name}\'s rent is expiring in 30 days`
                                 noticeList.push(expiry);
-                                
+
                                 const notification = Notification.create({
                                     title: "1 month notice",
                                     body: expiry,
@@ -134,11 +135,49 @@ class NotificationsController {
     }
 
 
-    // static async updateNotification(req, res) {
-        
-    // }
+    static async updateNotification(req, res) {
+        try {
+    
+            const findNotification = await Notification.findOne({
+                where: {
+                    id: req.params.id
+                }
+            });
+
+            if (findNotification) {
+                Notification.update({
+                    completed: req.body.completed
+                },
+                    { where: { id: req.params.id } }
+
+                ).then(async (notification) => {
+
+                    await Notice.create(
+                        {
+                            title: findNotification.title,
+                            notificationId: findNotification.id
+                        }
+                    );
+                });
+                return successResponse(true, 'Notification updated successfully', null, res);
+            } else {
+                return successResponse(false, 'Notification does not exist', null, res);
+            }
+            
+        } catch (err) {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+            );
+        }
+    }
+
 }
 
 module.exports = {
-    showAllNotifications: NotificationsController.showAllNotifications
+    showAllNotifications: NotificationsController.showAllNotifications,
+    updateNotification: NotificationsController.updateNotification
 };

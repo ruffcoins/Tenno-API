@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 
 
-const sequelize = new Sequelize(process.env.database, process.env.username, process.env.password, {
+const sequelize = new Sequelize(process.env.database, 'root', process.env.password, {
     host: process.env.host,
     dialect: 'mysql',
     dialectOptions: {
@@ -15,6 +15,7 @@ const sequelize = new Sequelize(process.env.database, process.env.username, proc
     }
 });
 
+// console.log(process.env.database, process.env.username, process.env.password)
 const db = {};
 
 db.Sequelize = Sequelize;
@@ -27,18 +28,19 @@ db.rooms = require('../models/rooms')(sequelize, Sequelize);
 db.tenant = require('../models/tenants')(sequelize, Sequelize);
 db.settings = require('../models/settings')(sequelize, Sequelize);
 db.notifications = require('../models/notifications')(sequelize, Sequelize);
-
+db.notice = require('../models/notices')(sequelize, Sequelize);
 
 
 // database relationships
 db.owner.hasMany(db.properties, { onDelete: 'cascade' });
 db.properties.belongsTo(db.owner);
-db.rooms.belongsTo(db.properties, {foreignKey: 'property_id', onDelete: 'cascade'});
-db.tenant.hasOne(db.rooms, {foreignKey: 'tenant_id'});
+db.rooms.belongsTo(db.properties, { foreignKey: 'property_id', onDelete: 'cascade' });
+db.tenant.hasOne(db.rooms, { foreignKey: 'tenant_id' });
 db.notifications.belongsTo(db.rooms);
+db.notice.belongsTo(db.notifications);
 
 
- db.sequelize.sync();
+db.sequelize.sync();
 // {force:true}
 db.sequelize
     .authenticate()
