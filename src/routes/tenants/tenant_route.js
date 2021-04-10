@@ -5,7 +5,8 @@ const {
     showRoom,
     updateTenant,
     deleteTenant,
-    getAllTenants
+    getAllTenants,
+    searchTenants
 } = require('../../controllers/tenants/tenant_controller');
 
 
@@ -14,6 +15,7 @@ router.get('/api/tenno/tenant/room/show/:id', showRoom);
 router.put('/api/tenno/tenant/update/:id', updateTenant);
 router.delete('/api/tenno/tenant/delete/:id', deleteTenant);
 router.get('/api/tenno/tenant/getAllTenants', getAllTenants);
+router.get('/api/tenno/tenant/search', searchTenants);
 
 // router.delete('/api/tenno/properties/delete/:id', deleteProperty);
 

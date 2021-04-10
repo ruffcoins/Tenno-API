@@ -1,5 +1,6 @@
 const db = require('../../db/sequilize');
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 const Property = db.properties;
 const Owner = db.owner;
 const Room = db.rooms;
@@ -207,6 +208,32 @@ class PropertiesController{
 
     }
     
+    static async searchProperties(req, res) {
+        const { term } = req.query;
+
+        Property.findAll({
+            where: {
+                [Op.or]: {
+                    address: { [Op.like]: '%' + term + '%' },
+                }
+            }
+        }).then(property => {
+            return successResponse(
+                true,
+                property,
+                undefined,
+                res
+            );
+        }).catch(err => {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+            );
+        })
+    }
 }
 
 module.exports = {
@@ -214,5 +241,6 @@ module.exports = {
     showProperty: PropertiesController.showProperty,
     deleteProperty: PropertiesController.deleteProperty,
     getAnOwnersProperties: PropertiesController.getAnOwnersProperties,
-    getAvailablePropertyRooms: PropertiesController.getAvailablePropertyRooms
+    getAvailablePropertyRooms: PropertiesController.getAvailablePropertyRooms,
+    searchProperties: PropertiesController.searchProperties
 };

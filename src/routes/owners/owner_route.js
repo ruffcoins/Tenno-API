@@ -5,7 +5,8 @@ const {
     showOwner,
     updateOwner,
     deleteOwner,
-    getAllOwners
+    getAllOwners,
+    searchOwners
 } = require('../../controllers/owners/owner_controller');
 
 
@@ -14,6 +15,7 @@ router.get('/api/tenno/owner/show/:id', showOwner);
 router.put('/api/tenno/owner/update/:id', updateOwner);
 router.delete('/api/tenno/owner/delete/:id', deleteOwner);
 router.get('/api/tenno/owner/allOwners', getAllOwners);
+router.get('/api/tenno/owner/search', searchOwners);
 
 module.exports = router;
 

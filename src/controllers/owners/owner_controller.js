@@ -1,15 +1,16 @@
 const db = require('../../db/sequilize');
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 const Owner = db.owner;
 const { errorResponse, successResponse } = require('../../utils/responses');
 const owners = require('../../models/owners');
 
-class OwnerController{
+class OwnerController {
 
 
-    static async getAllOwners(req, res){
+    static async getAllOwners(req, res) {
         let offset = parseInt(req.query.skip);
-       
+
         Owner.findAndCountAll({
             attributes: ['id', 'name', 'phone'],
             limit: 10,
@@ -33,15 +34,15 @@ class OwnerController{
         });
     }
 
-    static async create(req,res){
+    static async create(req, res) {
         try {
             const owner = await Owner.create({
                 name: req.body.name,
                 phone: req.body.phone
             });
             return successResponse(true, owner, null, res);
-        }catch (err) {
-            if(err instanceof Sequelize.ValidationError){
+        } catch (err) {
+            if (err instanceof Sequelize.ValidationError) {
                 return errorResponse(
                     false,
                     'Duplicate phone number',
@@ -53,18 +54,18 @@ class OwnerController{
         }
     }
 
-    static async showOwner(req, res){
+    static async showOwner(req, res) {
         Owner.findOne({
             where: {
                 id: req.params.id
             },
-            
+
         }).then(owner => {
             if (owner === null) {
                 return successResponse(false, 'Owner does not exist', null, res);
-            }else {
+            } else {
                 return successResponse(true, owner, null, res);
-            }            
+            }
         }).catch(err => {
             return errorResponse(
                 false,
@@ -82,16 +83,16 @@ class OwnerController{
             const owner = await Owner.update({
                 name: req.body.name,
                 phone: req.body.phone
-                },
+            },
                 { where: { id: req.params.id } }
             );
-            
+
             if (owner[0] === 0) {
                 return successResponse(false, 'Owner does not exist', null, res);
-            }else {
+            } else {
                 return successResponse(true, 'Owner updated successfully', null, res);
             }
-        }catch (err) {
+        } catch (err) {
             return errorResponse(
                 false,
                 'Something went wrong',
@@ -108,7 +109,7 @@ class OwnerController{
                 { where: { id: req.params.id } }
             );
             return successResponse(true, "Owner deleted successfully", null, res);
-        }catch (err) {
+        } catch (err) {
             return errorResponse(
                 false,
                 'Something went wrong',
@@ -118,6 +119,34 @@ class OwnerController{
             );
         }
     }
+
+    static async searchOwners(req, res) {
+        const { term } = req.query;
+
+        Owner.findAll({
+            where: {
+                [Op.or]: {
+                    name: { [Op.like]: '%' + term + '%' },
+                    phone: { [Op.like]: '%' + term + '%' }
+                }
+            }
+        }).then(owner => {
+            return successResponse(
+                true,
+                owner,
+                undefined,
+                res
+            );
+        }).catch(err => {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+            );
+        })
+    }
 }
 
 module.exports = {
@@ -125,5 +154,6 @@ module.exports = {
     showOwner: OwnerController.showOwner,
     updateOwner: OwnerController.updateOwner,
     deleteOwner: OwnerController.deleteOwner,
-    getAllOwners: OwnerController.getAllOwners
+    getAllOwners: OwnerController.getAllOwners,
+    searchOwners: OwnerController.searchOwners
 };

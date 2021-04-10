@@ -1,5 +1,6 @@
 const db = require('../../db/sequilize');
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 const Property = db.properties;
 const Owner = db.owner;
 const Room = db.rooms;
@@ -248,6 +249,36 @@ class TenantController{
         }
     }
 
+    static async searchTenants(req, res) {
+        const { term } = req.query;
+
+        Tenant.findAll({
+            where: {
+                [Op.or]: {
+                    first_name: { [Op.like]: '%' + term + '%' },
+                    last_name: { [Op.like]: '%' + term + '%' },
+                    phone_number: { [Op.like]: '%' + term + '%' },
+
+                }
+            }
+        }).then(tenant => {
+            return successResponse(
+                true,
+                tenant,
+                undefined,
+                res
+            );
+        }).catch(err => {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+            );
+        })
+    }
+
 }
 
 module.exports = {
@@ -255,5 +286,6 @@ module.exports = {
     showRoom: TenantController.showRoom,
     updateTenant: TenantController.updateTenant,
     deleteTenant: TenantController.deleteTenant,
-    getAllTenants: TenantController.getAllTenants 
+    getAllTenants: TenantController.getAllTenants,
+    searchTenants: TenantController.searchTenants
 };
