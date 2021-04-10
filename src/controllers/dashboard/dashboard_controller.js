@@ -4,6 +4,8 @@ const Owner = db.owner;
 const Property = db.properties;
 const Room = db.rooms;
 const Tenant = db.tenant;
+const Notice = db.notice;
+const Notification = db.notifications;
 const { errorResponse, successResponse } = require('../../utils/responses');
 
 class DashboardController {
@@ -40,7 +42,19 @@ class DashboardController {
         });
         const tenantCount = tenantList.count;
 
-        return successResponse(true, {ownerCount, propertyCount, roomCount, tenantCount}, null, res)
+        // notices
+        const noticeList = await Notice.findAndCountAll({
+
+        });
+        const noticeCount = noticeList.count;
+
+        // notices
+        const expiringList = await Notification.findAndCountAll({
+
+        });
+        const expiringCount = expiringList.count;
+
+        return successResponse(true, { ownerCount, propertyCount, roomCount, tenantCount, noticeCount, expiringCount}, null, res)
     }
 }
 
