@@ -29,6 +29,7 @@ db.tenant = require('../models/tenants')(sequelize, Sequelize);
 db.settings = require('../models/settings')(sequelize, Sequelize);
 db.notifications = require('../models/notifications')(sequelize, Sequelize);
 db.notice = require('../models/notices')(sequelize, Sequelize);
+db.timeline = require('../models/timeline')(sequelize, Sequelize);
 
 
 // database relationships

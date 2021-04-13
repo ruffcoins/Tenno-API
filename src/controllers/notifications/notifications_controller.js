@@ -4,7 +4,9 @@ const Sequelize = require('sequelize');
 const Room = db.rooms;
 const Notification = db.notifications;
 const Notice = db.notice;
+const Timeline = db.timeline;
 const { errorResponse, successResponse } = require('../../utils/responses');
+const { raw } = require('body-parser');
 
 class NotificationsController {
 
@@ -15,30 +17,55 @@ class NotificationsController {
         let today = new Date();
         let timeline = today.getFullYear() + " " + (today.getMonth() + 1) + " " + today.getDate();
 
-        // First I want to read the file
-        fs.readFile('timeline.txt', 'utf8', function read(err, data) {
-            if (err) {
-                throw err;
-            }
-            const content = data;
-
-            // Invoke the next step here however you like
-            //console.log(content);   // Put all of the code here (not the best solution)
-            processFile(content);   // Or put the next step in a function and invoke it
+        //Count the rows in the timeline table
+        let noOfTimelines = await Timeline.findAll({
+            attributes: [[db.sequelize.fn('count', db.sequelize.col('id')), 'count']],
+            raw: true
         });
 
+        // itf theres no row, create one
+        if (noOfTimelines[0].count == 0) {
+            await Timeline.create({
+                timeline: timeline
+            });
+        }
+
+        // Get the  macimum ID value (most recent) of the most recent database entry
+        const maxId = await Timeline.findAll({
+            attributes: [
+                [db.sequelize.fn('MAX', db.sequelize.col('id')), 'id']
+            ],
+            raw: true,
+        });
+
+        // Find the row associated with the Maximum ID
+        const maxIdRow = await Timeline.findOne({
+            where: {
+                id: maxId[0].id,
+            }
+        });
+
+        if (maxIdRow) {
+
+            const content = maxIdRow.timeline;
+
+            processFile(content);
+        }
+
         function processFile(content) {
+
             if (content == timeline) {
                 // do Nothing
                 getAllNotifications();
             } else {
                 getAllNotificationsAndSaveInDatabase();
 
-                fs.writeFile('timeline.txt', `${timeline}`, function (err) {
-                    if (err) throw err;
+                Timeline.create({
+                    timeline: timeline
                 });
             }
         }
+
 
         function getAllNotificationsAndSaveInDatabase() {
             Room.findAll().then((rooms) => {
@@ -137,7 +164,7 @@ class NotificationsController {
 
     static async updateNotification(req, res) {
         try {
-    
+
             const findNotification = await Notification.findOne({
                 where: {
                     id: req.params.id
@@ -163,7 +190,7 @@ class NotificationsController {
             } else {
                 return successResponse(false, 'Notification does not exist', null, res);
             }
-            
+
         } catch (err) {
             return errorResponse(
                 false,
