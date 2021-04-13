@@ -177,6 +177,33 @@ class PropertiesController{
 
     }
 
+    static async allPropertiesWithTheirOwners(req, res) {
+
+        try {
+            const allProperties = await Property.findAll({
+                include: Owner
+            });
+
+            return successResponse(
+                    true,
+                    allProperties,
+                    null,
+                    res
+                );
+
+        } catch (err) {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        }
+
+    }
+
     // Get all the rooms available in a property
     static async getAvailablePropertyRooms(req, res) {
 
@@ -242,5 +269,6 @@ module.exports = {
     deleteProperty: PropertiesController.deleteProperty,
     getAnOwnersProperties: PropertiesController.getAnOwnersProperties,
     getAvailablePropertyRooms: PropertiesController.getAvailablePropertyRooms,
+    allPropertiesWithTheirOwners: PropertiesController.allPropertiesWithTheirOwners,
     searchProperties: PropertiesController.searchProperties
 };
