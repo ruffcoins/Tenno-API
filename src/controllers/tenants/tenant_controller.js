@@ -10,11 +10,11 @@ const { request } = require('../../../app');
 const { tenant } = require('../../db/sequilize');
 const tenants = require('../../models/tenants');
 
-class TenantController{
-    
+class TenantController {
+
     // Get all tenants
-    static async getAllTenants(req, res){
-       
+    static async getAllTenants(req, res) {
+
         Tenant.findAndCountAll({
             attributes: ['id', 'first_name', 'last_name', 'phone_number', 'occupation', 'marital_status', 'sex', 'active'],
         }).then(tenants => {
@@ -40,17 +40,17 @@ class TenantController{
     static async createTenant(req, res) {
 
         try {
-            
+
             // Find an owner by phone number
             const owner = await Owner.findOne({
-                where:{
+                where: {
                     phone: req.body.phone
                 }
             });
 
             // return successResponse(true, owner, null, res);
 
-            if(!owner){
+            if (!owner) {
                 return successResponse(false, 'Owner does not exist', null, res);
             }
 
@@ -60,19 +60,19 @@ class TenantController{
                     address: req.body.address
                 }
             });
-            if(!property){
+            if (!property) {
                 return successResponse(false, 'Property does not exist', null, res);
             }
 
             const room = await Room.findOne({
                 where: {
-                    property_id: property.id,
+                    propertyId: property.id,
                     id: req.body.id,
-                    available : true
+                    available: true
                 }
             });
 
-            if(!room){
+            if (!room) {
                 return successResponse(false, 'Room does not exist or is not available', null, res);
             }
 
@@ -84,7 +84,7 @@ class TenantController{
                 marital_status: req.body.marital_status,
                 sex: req.body.sex
             }).then((tenant) => {
-                
+
                 Room.update({
                     tenant_id: tenant.id,
                     start_date: req.body.start_date,
@@ -96,9 +96,9 @@ class TenantController{
                     { where: { id: req.body.id } }
                 );
 
-                return successResponse(true, 'successful', null, res);
-            }).catch((err)=>{
-                if(err instanceof Sequelize.ValidationError){
+                return successResponse(true, 'Tenant created successfully', null, res);
+            }).catch((err) => {
+                if (err instanceof Sequelize.ValidationError) {
                     return errorResponse(
                         false,
                         'Duplicate phone number',
@@ -122,7 +122,7 @@ class TenantController{
     }
 
     // Read
-    static async showRoom(req, res){
+    static async showRoom(req, res) {
 
         try {
             const room = await Room.findOne({
@@ -130,7 +130,7 @@ class TenantController{
                     id: req.params.id
                 },
             });
-            
+
             if (!room) {
                 return successResponse(false, 'Room does not exist', null, res);
             }
@@ -145,7 +145,7 @@ class TenantController{
                 return successResponse(false, 'Tenant does not exist', null, res);
             }
 
-            return (successResponse(true, {room, tenant}, null, res))
+            return (successResponse(true, { room, tenant }, null, res))
 
         } catch (err) {
             return errorResponse(
@@ -162,7 +162,7 @@ class TenantController{
         try {
 
             const findRoom = await Room.findOne({
-                where:{id: req.params.id}
+                where: { id: req.params.id }
             });
 
             if (findRoom) {
@@ -173,12 +173,12 @@ class TenantController{
                         duration: req.body.duration,
                         amount: req.body.amount
                     }, {
-                      
-                         where: { id: findRoom.id },
-                    
-                        }
-                ).then(async(room)=>{
-                   
+
+                    where: { id: findRoom.id },
+
+                }
+                ).then(async (room) => {
+
                     await Tenant.update(
                         {
                             first_name: req.body.first_name,
@@ -211,7 +211,7 @@ class TenantController{
         try {
 
             const findTenant = await Tenant.findOne({
-                where:{id: req.params.id}
+                where: { id: req.params.id }
             });
 
             if (findTenant) {
@@ -234,11 +234,11 @@ class TenantController{
 
                 await Tenant.destroy(
                     { where: { id: req.params.id } }
-                );                
+                );
             }
 
             return successResponse(true, "Tenant deleted successfully", null, res);
-        }catch (err) {
+        } catch (err) {
             return errorResponse(
                 false,
                 'Something went wrong',

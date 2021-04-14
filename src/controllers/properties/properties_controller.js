@@ -6,7 +6,7 @@ const Owner = db.owner;
 const Room = db.rooms;
 const { errorResponse, successResponse } = require('../../utils/responses');
 
-class PropertiesController{
+class PropertiesController {
     /** 
      * Create property controller
      * 
@@ -18,21 +18,21 @@ class PropertiesController{
      * 
      * populate rooms table
      **/
-    
-     static async createProperty(req, res) {
+
+    static async createProperty(req, res) {
 
         const roomArray = [];
         try {
 
             // Find an owner by phone number
             const owner = await Owner.findOne({
-                where:{
+                where: {
                     phone: req.body.phone
                 }
             });
 
-            
-            if(!owner){
+
+            if (!owner) {
                 return successResponse(false, 'Owner does not exist', null, res);
             }
 
@@ -46,30 +46,30 @@ class PropertiesController{
 
                 // After creating the property, create all the rooms attached to that property
                 let roomName = '';
-                for(let i = 0; i< req.body.rooms.length; i++){
+                for (let i = 0; i < req.body.rooms.length; i++) {
                     roomArray.push(req.body.rooms[i]);
                 }
-            
-                for(let i = 0; i< roomArray.length; i++){
-                 
-                    for(let j = 0; j< roomArray[i].number; j++){
-                       if(!Number.isNaN(parseInt(roomArray[i].room_type.charAt(0), 10))){
-                           roomName = roomArray[i].room_type;
-                       }else{
-                           roomName = roomArray[i].room_type.charAt(0);
-                       }
-                         Room.create({
-                            property_id: property.id,
+
+                for (let i = 0; i < roomArray.length; i++) {
+
+                    for (let j = 0; j < roomArray[i].number; j++) {
+                        if (!Number.isNaN(parseInt(roomArray[i].room_type.charAt(0), 10))) {
+                            roomName = roomArray[i].room_type;
+                        } else {
+                            roomName = roomArray[i].room_type.charAt(0);
+                        }
+                        Room.create({
+                            propertyId: property.id,
                             room_type: roomArray[i].room_type,
-                            room_name: `${roomName}room${j+1}`
-    
+                            room_name: `${roomName}room${j + 1}`
+
                         });
                     }
                 }
 
                 return successResponse(true, 'successful', null, res);
-            }).catch((err)=>{
-                if(err instanceof Sequelize.ValidationError){
+            }).catch((err) => {
+                if (err instanceof Sequelize.ValidationError) {
                     return errorResponse(
                         false,
                         'Duplicate property address',
@@ -80,7 +80,7 @@ class PropertiesController{
                 }
             });
 
-            
+
         } catch (error) {
             return errorResponse(
                 false,
@@ -93,19 +93,19 @@ class PropertiesController{
         }
     }
 
-    static async showProperty(req, res){
-        
+    static async showProperty(req, res) {
+
         const property = Property.findOne({
             where: {
                 id: req.params.id
             },
-            
+
         }).then(property => {
             if (!property) {
                 return successResponse(false, 'Property does not exist', null, res);
-            }else {
+            } else {
                 return successResponse(true, property, null, res);
-            }            
+            }
         }).catch(err => {
             return errorResponse(
                 false,
@@ -125,7 +125,7 @@ class PropertiesController{
                 { where: { id: req.params.id } }
             );
             return successResponse(true, "Property deleted successfully", null, res);
-        }catch (err) {
+        } catch (err) {
             return errorResponse(
                 false,
                 'Something went wrong',
@@ -138,12 +138,12 @@ class PropertiesController{
 
 
     static async getAnOwnersProperties(req, res) {
-
+        const { id } = req.query;
         try {
             const ownerProperty = await Owner.findAll({
                 include: Property,
                 where: {
-                    id: req.body.id
+                    id: id
                 }
             });
 
@@ -162,9 +162,9 @@ class PropertiesController{
                     res
                 );
             }
-            
-            
-        }catch (err) {
+
+
+        } catch (err) {
             return errorResponse(
                 false,
                 'Something went wrong',
@@ -185,11 +185,11 @@ class PropertiesController{
             });
 
             return successResponse(
-                    true,
-                    allProperties,
-                    null,
-                    res
-                );
+                true,
+                allProperties,
+                null,
+                res
+            );
 
         } catch (err) {
             return errorResponse(
@@ -206,23 +206,31 @@ class PropertiesController{
 
     // Get all the rooms available in a property
     static async getAvailablePropertyRooms(req, res) {
-
-        Room.findAndCountAll({
-            attributes: ['id', 'room_type', 'room_name'],
-        },
-        {
-            where: {
-                address: req.body.address,
-                available: true
+        const { address } = req.query;
+        try {
+            const property = await Property.findOne({
+                where: {
+                    address: address
+                }
+            });
+            if (!property) {
+                return successResponse(false, 'Property does not exist', null, res);
             }
-        }).then(rooms => {
+
+            const availableRooms = await Room.findAll({
+                where: {
+                    propertyId: property.id,
+                    available: true
+                }
+            });
+
             return successResponse(
                 true,
-                rooms,
-                undefined,
+                availableRooms,
+                null,
                 res
             );
-        }).catch(err => {
+        } catch (err) {
             return errorResponse(
                 false,
                 'Something went wrong',
@@ -231,10 +239,10 @@ class PropertiesController{
                 res
 
             );
-        });
+        }
 
     }
-    
+
     static async searchProperties(req, res) {
         const { term } = req.query;
 

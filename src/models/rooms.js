@@ -13,13 +13,6 @@ module.exports = (sequelize, Sequelize) => {
             field: 'updated_at',
             type: Sequelize.DATE,
         },
-        property_id: {
-            type: Sequelize.BIGINT(20),
-            allowNull: false,
-            validate: {
-                notNull: { msg: "property_id is required" },
-            },
-        },
         tenant_id: {
             type: Sequelize.BIGINT(20),
         },
