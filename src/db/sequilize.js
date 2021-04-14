@@ -35,13 +35,14 @@ db.timeline = require('../models/timeline')(sequelize, Sequelize);
 // database relationships
 db.owner.hasMany(db.properties, { onDelete: 'cascade' });
 db.properties.belongsTo(db.owner);
-db.rooms.belongsTo(db.properties, { foreignKey: 'property_id', onDelete: 'cascade' });
+db.properties.hasMany(db.rooms, { onDelete: 'cascade' });
+db.rooms.belongsTo(db.properties);
 db.tenant.hasOne(db.rooms, { foreignKey: 'tenant_id' });
 db.notifications.belongsTo(db.rooms);
 db.notice.belongsTo(db.notifications);
 
 
-db.sequelize.sync();
+db.sequelize.sync({ force: true });
 // {force:true}
 db.sequelize
     .authenticate()

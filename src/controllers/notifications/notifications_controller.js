@@ -15,6 +15,10 @@ class NotificationsController {
         let noticeList = [];
 
         let today = new Date();
+        let yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday = yesterday.toDateString();
+
         let timeline = today.getFullYear() + " " + (today.getMonth() + 1) + " " + today.getDate();
 
         //Count the rows in the timeline table
@@ -26,7 +30,7 @@ class NotificationsController {
         // itf theres no row, create one
         if (noOfTimelines[0].count == 0) {
             await Timeline.create({
-                timeline: timeline
+                timeline: yesterday
             });
         }
 
