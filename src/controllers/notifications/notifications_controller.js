@@ -2,22 +2,33 @@ const fs = require('fs');
 const db = require('../../db/sequilize');
 const Sequelize = require('sequelize');
 const Room = db.rooms;
+const Tenant = db.tenant;
+const Owner = db.owner;
 const Notification = db.notifications;
+const Property = db.properties;
 const Notice = db.notice;
 const Timeline = db.timeline;
 const { errorResponse, successResponse } = require('../../utils/responses');
 const { raw } = require('body-parser');
+const { showProperty } = require('../properties/properties_controller');
+
+let notificationList = [];
 
 class NotificationsController {
 
     static async showAllNotifications(req, res) {
 
-        let noticeList = [];
-
+        //Create today and yesterday's date
         let today = new Date();
         let yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday = yesterday.toDateString();
+
+        // create a timeline
+        // The timeline is used to check the date stored in the timeline
+        // table against today's date. if the date doesn't match, look through
+        // the list ot get current expiring rooms, if it does match, just get all
+        // stored notifications
 
         let timeline = today.getFullYear() + " " + (today.getMonth() + 1) + " " + today.getDate();
 
@@ -27,14 +38,14 @@ class NotificationsController {
             raw: true
         });
 
-        // itf theres no row, create one
+        // if theres no row, create one and put yesterday's date in it
         if (noOfTimelines[0].count == 0) {
             await Timeline.create({
                 timeline: yesterday
             });
         }
 
-        // Get the  macimum ID value (most recent) of the most recent database entry
+        // Get the  maximum ID value (most recent) of the most recent timeline table 
         const maxId = await Timeline.findAll({
             attributes: [
                 [db.sequelize.fn('MAX', db.sequelize.col('id')), 'id']
@@ -71,7 +82,7 @@ class NotificationsController {
         }
 
 
-        function getAllNotificationsAndSaveInDatabase() {
+        async function getAllNotificationsAndSaveInDatabase() {
             Room.findAll().then((rooms) => {
 
                 rooms.forEach(room => {
@@ -95,9 +106,8 @@ class NotificationsController {
 
                             if (remainingTime <= 0) {
 
-                                // let expiry = successResponse(true, `${room.room_name}\'s rent has expired `, null, res);
-                                let expiry = `${room.room_name}\'s rent has expired `;
-                                noticeList.push(expiry);
+                                // let expiry = successResponse(true, `This room's rent has expired `, null, res);
+                                let expiry = `This room's rent has expired `;
 
                                 const notification = Notification.create({
                                     title: "Expired",
@@ -107,8 +117,7 @@ class NotificationsController {
 
                             } else if (remainingTime <= 14 && remainingTime > 0) {
 
-                                let expiry = `${room.room_name}\'s rent is expiring in 14 days`;
-                                noticeList.push(expiry);
+                                let expiry = `This room's rent is expiring in 14 days`;
 
                                 const notification = Notification.create({
                                     title: "2 weeks notice",
@@ -118,8 +127,7 @@ class NotificationsController {
 
                             } else if (remainingTime <= 30 && remainingTime >= 14) {
 
-                                let expiry = `${room.room_name}\'s rent is expiring in 30 days`
-                                noticeList.push(expiry);
+                                let expiry = `This room's rent is expiring in 30 days`
 
                                 const notification = Notification.create({
                                     title: "1 month notice",
@@ -137,18 +145,74 @@ class NotificationsController {
 
                 });
 
-                return successResponse(true, noticeList, null, res);
+                return successResponse(true, getAllNotifications(), null, res);
             });
         }
 
-        function getAllNotifications() {
+        async function getAllNotifications() {
+            let notificationObject;
+            let room;
+            let property;
+            let owner;
+            let tenant;
 
-            Notification.findAndCountAll({
+            const notifications = await Notification.findAll({
                 attributes: ['id', 'title', 'body', 'roomId', 'completed', 'created_at', 'updated_at'],
-            }).then(notifications => {
+                raw: true
+
+            }).then(async (notifications) => {
+                for (let i = 0; i < notifications.length; i++) {
+                    notificationObject = {
+                        "notificationsTitle": "",
+                        "notificationsBody": "",
+                        "roomName": "",
+                        "tenantFirstName": "",
+                        "tenantLastName": "",
+                        "tenantPhone": "",
+                        "propertyAddress": "",
+                        "ownerName": "",
+                    }
+                    notificationObject.notificationsTitle = notifications[i].title;
+                    notificationObject.notificationsBody = notifications[i].body;
+
+                    room = await Room.findOne({
+                        where: {
+                            id: notifications[i].roomId
+                        }
+
+                    }).then(async (room) => {
+                        notificationObject.roomName = room.dataValues.room_name;
+                        tenant = await Tenant.findOne({
+                            where: {
+                                id: room.dataValues.tenant_id
+                            }
+                        })
+                        notificationObject.tenantFirstName = tenant.dataValues.first_name;
+                        notificationObject.tenantLastName = tenant.dataValues.last_name;
+                        notificationObject.tenantPhone = tenant.dataValues.phone_number;
+
+                        property = await Property.findOne({
+                            where: {
+                                id: room.dataValues.propertyId
+                            }
+                        }).then(async (property) => {
+
+                            notificationObject.propertyAddress = property.dataValues.address
+                            owner = await Owner.findOne({
+                                where: {
+                                    id: property.dataValues.ownerId
+                                }
+                            });
+                            notificationObject.ownerName = owner.dataValues.name
+                        });
+
+                    })
+                    notificationList.push(notificationObject);
+                }
+
                 return successResponse(
                     true,
-                    notifications,
+                    notificationList,
                     null,
                     res
                 );
@@ -206,9 +270,60 @@ class NotificationsController {
         }
     }
 
+    // static async refreshNotification(req, res) {
+
+    //     //Create today and yesterday's date
+    //     let today = new Date();
+    //     let yesterday = new Date(today);
+    //     yesterday.setDate(yesterday.getDate() - 1);
+    //     yesterday = yesterday.toDateString();
+
+    //     let timeline = today.getFullYear() + " " + (today.getMonth() + 1) + " " + today.getDate();
+    //     let previousTimeline = yesterday.getFullYear() + " " + (yesterday.getMonth() + 1) + " " + yesterday.getDate();
+
+    //     console.log(previousTimeline);
+
+    //     // // Get the  maximum ID value (most recent) of the most recent timeline table 
+    //     // const maxId = await Timeline.findAll({
+    //     //     attributes: [
+    //     //         [db.sequelize.fn('MAX', db.sequelize.col('id')), 'id']
+    //     //     ],
+    //     //     raw: true,
+    //     // });
+
+    //     // // Find the row associated with the Maximum ID
+    //     // const maxIdRow = await Timeline.findOne({
+    //     //     where: {
+    //     //         id: maxId[0].id,
+    //     //     }
+    //     // });
+
+    //     // if (maxIdRow) {
+
+    //     //     const content = maxIdRow.timeline;
+
+    //     //     processFile(content);
+    //     // }
+
+    //     // function processFile(content) {
+
+    //     //     if (content == timeline) {
+    //     //         // do Nothing
+    //     //         getAllNotifications();
+    //     //     } else {
+    //     //         getAllNotificationsAndSaveInDatabase();
+
+    //     //         Timeline.create({
+    //     //             timeline: previousTimeline
+    //     //         });
+    //     //     }
+    //     // }
+    // }
+
 }
 
 module.exports = {
     showAllNotifications: NotificationsController.showAllNotifications,
-    updateNotification: NotificationsController.updateNotification
+    updateNotification: NotificationsController.updateNotification,
+    // refreshNotification: NotificationsController.refreshNotification
 };
