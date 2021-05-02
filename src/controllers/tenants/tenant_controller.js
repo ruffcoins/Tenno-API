@@ -15,8 +15,9 @@ class TenantController {
     // Get all tenants
     static async getAllTenants(req, res) {
 
-        Tenant.findAndCountAll({
+        await Tenant.findAll({
             attributes: ['id', 'first_name', 'last_name', 'phone_number', 'occupation', 'marital_status', 'sex', 'active'],
+            include: Room
         }).then(tenants => {
             return successResponse(
                 true,
