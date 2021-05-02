@@ -163,6 +163,7 @@ class NotificationsController {
             }).then(async (notifications) => {
                 for (let i = 0; i < notifications.length; i++) {
                     notificationObject = {
+                        "id": 0,
                         "notificationsTitle": "",
                         "notificationsBody": "",
                         "roomName": "",
@@ -171,9 +172,12 @@ class NotificationsController {
                         "tenantPhone": "",
                         "propertyAddress": "",
                         "ownerName": "",
+                        "completed": false
                     }
+                    notificationObject.id = notifications[i].id;
                     notificationObject.notificationsTitle = notifications[i].title;
                     notificationObject.notificationsBody = notifications[i].body;
+                    notificationObject.completed = notifications[i].completed;
 
                     room = await Room.findOne({
                         where: {
