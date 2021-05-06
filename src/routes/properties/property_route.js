@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const {
-    createProperty, 
+    createProperty,
     showProperty,
     deleteProperty,
     getAnOwnersProperties,
     getAvailablePropertyRooms,
     allPropertiesWithTheirOwners,
+    allPropertiesWithTheirOwnersAndRooms,
     searchProperties
 } = require('../../controllers/properties/properties_controller');
 
@@ -17,6 +18,7 @@ router.delete('/api/tenno/properties/delete/:id', deleteProperty);
 router.get('/api/tenno/properties/getOwnerProperties', getAnOwnersProperties);
 router.get('/api/tenno/properties/getAvailablePropertyRooms', getAvailablePropertyRooms);
 router.get('/api/tenno/properties/allPropertiesWithTheirOwners', allPropertiesWithTheirOwners);
+router.get('/api/tenno/properties/allPropertiesWithTheirOwnersAndRooms', allPropertiesWithTheirOwnersAndRooms);
 router.get('/api/tenno/properties/search', searchProperties);
 
 module.exports = router;
