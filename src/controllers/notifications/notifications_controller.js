@@ -157,6 +157,7 @@ class NotificationsController {
         async function getAllNotifications() {
             let notificationObject;
             let notificationBody;
+            let completedNotification;
             let room;
             let property;
             let owner;
@@ -182,6 +183,12 @@ class NotificationsController {
                         "completed": false
                     }
 
+                    if (notifications[i].completed == 0) {
+                        completedNotification = false
+                    } else {
+                        completedNotification = true
+                    }
+
                     if (notifications[i].title === "Expired") {
                         notificationBody = `This room's rent has expired`
                     } else if (notifications[i].title === "2 weeks notice") {
@@ -190,11 +197,10 @@ class NotificationsController {
                         notificationBody = `This room's rent is expiring in 30 days`
                     }
 
-
                     notificationObject.id = notifications[i].id;
                     notificationObject.notificationsTitle = notifications[i].title;
                     notificationObject.notificationsBody = notificationBody;
-                    notificationObject.completed = notifications[i].completed;
+                    notificationObject.completed = completedNotification;
 
                     room = await Room.findOne({
                         where: {
