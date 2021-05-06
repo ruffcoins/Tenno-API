@@ -107,7 +107,7 @@ class NotificationsController {
                             if (remainingTime <= 0) {
 
                                 // let expiry = successResponse(true, `This room's rent has expired `, null, res);
-                                let expiry = `This room's rent has expired `;
+                                let expiry = `${room.room_name}\'s rent has expired `;
 
                                 const notification = Notification.create({
                                     title: "Expired",
@@ -117,7 +117,7 @@ class NotificationsController {
 
                             } else if (remainingTime <= 14 && remainingTime > 0) {
 
-                                let expiry = `This room's rent is expiring in 14 days`;
+                                let expiry = `${room.room_name}\'s rent is expiring in 14 days`;
 
                                 const notification = Notification.create({
                                     title: "2 weeks notice",
@@ -127,7 +127,7 @@ class NotificationsController {
 
                             } else if (remainingTime <= 30 && remainingTime >= 14) {
 
-                                let expiry = `This room's rent is expiring in 30 days`
+                                let expiry = `${room.room_name}\'s rent is expiring in 30 days`
 
                                 const notification = Notification.create({
                                     title: "1 month notice",
@@ -151,12 +151,13 @@ class NotificationsController {
 
         async function getAllNotifications() {
             let notificationObject;
+            let notificationBody;
             let room;
             let property;
             let owner;
             let tenant;
 
-            const notifications = await Notification.findAll({
+            let notifications = await Notification.findAll({
                 attributes: ['id', 'title', 'body', 'roomId', 'completed', 'created_at', 'updated_at'],
                 raw: true
 
@@ -174,9 +175,19 @@ class NotificationsController {
                         "ownerName": "",
                         "completed": false
                     }
+
+                    if (notifications[i].title === "Expired") {
+                        notificationBody = `This room's rent has expired`
+                    } else if (notifications[i].title === "2 weeks notice") {
+                        notificationBody = `This room's rent is expiring in 14 days`
+                    } else {
+                        notificationBody = `This room's rent is expiring in 30 days`
+                    }
+
+
                     notificationObject.id = notifications[i].id;
                     notificationObject.notificationsTitle = notifications[i].title;
-                    notificationObject.notificationsBody = notifications[i].body;
+                    notificationObject.notificationsBody = notificationBody;
                     notificationObject.completed = notifications[i].completed;
 
                     room = await Room.findOne({
