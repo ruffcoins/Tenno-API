@@ -162,39 +162,40 @@ class TenantController {
     static async updateTenant(req, res) {
         try {
 
-            const findRoom = await Room.findOne({
+            const findTenant = await Tenant.findOne({
                 where: { id: req.params.id }
             });
 
-            if (findRoom) {
-                Room.update(
+            if (findTenant) {
+                Tenant.update(
                     {
-                        start_date: req.body.start_date,
-                        end_date: req.body.end_date,
-                        duration: req.body.duration,
-                        amount: req.body.amount
+                        first_name: req.body.first_name,
+                        last_name: req.body.last_name,
+                        phone_number: req.body.phone_number,
+                        occupation: req.body.occupation,
+                        marital_status: req.body.marital_status,
+                        sex: req.body.sex
+                        
                     }, {
 
-                    where: { id: findRoom.id },
+                    where: { id: findTenant.id },
 
                 }
-                ).then(async (room) => {
+                ).then(async (tenant) => {
 
-                    await Tenant.update(
+                    await Room.update(
                         {
-                            first_name: req.body.first_name,
-                            last_name: req.body.last_name,
-                            phone_number: req.body.phone_number,
-                            occupation: req.body.occupation,
-                            marital_status: req.body.marital_status,
-                            sex: req.body.sex
+                            start_date: req.body.start_date,
+                            end_date: req.body.end_date,
+                            duration: req.body.duration,
+                            amount: req.body.amount
                         },
-                        { where: { id: findRoom.tenant_id } }
+                        { where: { tenant_id: findTenant.id } }
                     );
                 });
             }
-
-            return successResponse(true, 'successful', null, res);
+            
+            return successResponse(true, 'Tenant updated Successfully', null, res);
 
         } catch (error) {
             return errorResponse(
