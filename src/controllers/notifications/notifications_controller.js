@@ -12,7 +12,7 @@ const { errorResponse, successResponse } = require('../../utils/responses');
 const { raw } = require('body-parser');
 const { showProperty } = require('../properties/properties_controller');
 
-let notificationList = [];
+
 
 class NotificationsController {
 
@@ -67,13 +67,15 @@ class NotificationsController {
             processFile(content);
         }
 
-        function processFile(content) {
+        async function processFile(content) {
+
 
             if (content == timeline) {
                 // do Nothing
                 getAllNotifications();
             } else {
-                getAllNotificationsAndSaveInDatabase();
+                await createNotification();
+                await getAllNotifications();
 
                 Timeline.create({
                     timeline: timeline
@@ -82,10 +84,10 @@ class NotificationsController {
         }
 
 
-        async function getAllNotificationsAndSaveInDatabase() {
-            Room.findAll().then((rooms) => {
+        async function createNotification() {
+            await Room.findAll().then(async (rooms) => {
 
-                rooms.forEach(room => {
+                rooms.forEach(async (room) => {
                     try {
                         if (room.available === false) {
 
@@ -109,7 +111,7 @@ class NotificationsController {
                                 // let expiry = successResponse(true, `This room's rent has expired `, null, res);
                                 let expiry = `${room.room_name}\'s rent has expired `;
 
-                                const notification = Notification.create({
+                                await Notification.create({
                                     title: "Expired",
                                     body: expiry,
                                     roomId: room.id
@@ -119,7 +121,7 @@ class NotificationsController {
 
                                 let expiry = `${room.room_name}\'s rent is expiring in 14 days`;
 
-                                const notification = Notification.create({
+                                await Notification.create({
                                     title: "2 weeks notice",
                                     body: expiry,
                                     roomId: room.id
@@ -129,7 +131,7 @@ class NotificationsController {
 
                                 let expiry = `${room.room_name}\'s rent is expiring in 30 days`
 
-                                const notification = Notification.create({
+                                await Notification.create({
                                     title: "1 month notice",
                                     body: expiry,
                                     roomId: room.id
@@ -145,8 +147,10 @@ class NotificationsController {
 
                 });
 
-                return successResponse(true, getAllNotifications(), null, res);
+
             });
+
+            // return successResponse(true, "Notification Created Successfully", null, res);
         }
 
         async function getAllNotifications() {
@@ -156,8 +160,9 @@ class NotificationsController {
             let property;
             let owner;
             let tenant;
+            let notificationList = [];
 
-            let notifications = await Notification.findAll({
+            await Notification.findAll({
                 attributes: ['id', 'title', 'body', 'roomId', 'completed', 'created_at', 'updated_at'],
                 raw: true
 
@@ -326,7 +331,7 @@ class NotificationsController {
     //     //         // do Nothing
     //     //         getAllNotifications();
     //     //     } else {
-    //     //         getAllNotificationsAndSaveInDatabase();
+    //     //         createNotification();
 
     //     //         Timeline.create({
     //     //             timeline: previousTimeline
