@@ -204,6 +204,33 @@ class PropertiesController {
 
     }
 
+    static async allPropertiesWithTheirOwnersAndRooms(req, res) {
+
+        try {
+            const allProperties = await Property.findAll({
+                include: [Owner, Room]
+            });
+
+            return successResponse(
+                true,
+                allProperties,
+                null,
+                res
+            );
+
+        } catch (err) {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        }
+
+    }
+
     // Get all the rooms available in a property
     static async getAvailablePropertyRooms(req, res) {
         const { address } = req.query;
@@ -278,5 +305,6 @@ module.exports = {
     getAnOwnersProperties: PropertiesController.getAnOwnersProperties,
     getAvailablePropertyRooms: PropertiesController.getAvailablePropertyRooms,
     allPropertiesWithTheirOwners: PropertiesController.allPropertiesWithTheirOwners,
+    allPropertiesWithTheirOwnersAndRooms: PropertiesController.allPropertiesWithTheirOwnersAndRooms,
     searchProperties: PropertiesController.searchProperties
 };
