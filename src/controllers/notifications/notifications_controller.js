@@ -75,11 +75,12 @@ class NotificationsController {
                 getAllNotifications();
             } else {
                 await createNotification();
-                await getAllNotifications();
 
-                Timeline.create({
+                content = await Timeline.create({
                     timeline: timeline
                 });
+
+                await getAllNotifications();
             }
         }
 
@@ -261,7 +262,7 @@ class NotificationsController {
 
             if (findNotification) {
                 Notification.update({
-                    completed: req.body.completed
+                    completed: true
                 },
                     { where: { id: req.params.id } }
 
@@ -299,45 +300,202 @@ class NotificationsController {
     //     yesterday = yesterday.toDateString();
 
     //     let timeline = today.getFullYear() + " " + (today.getMonth() + 1) + " " + today.getDate();
-    //     let previousTimeline = yesterday.getFullYear() + " " + (yesterday.getMonth() + 1) + " " + yesterday.getDate();
+    //     // let previousTimeline = yesterday.getFullYear() + " " + (yesterday.getMonth() + 1) + " " + yesterday.getDate();
 
-    //     console.log(previousTimeline);
+    //     // console.log(previousTimeline);
 
-    //     // // Get the  maximum ID value (most recent) of the most recent timeline table 
-    //     // const maxId = await Timeline.findAll({
-    //     //     attributes: [
-    //     //         [db.sequelize.fn('MAX', db.sequelize.col('id')), 'id']
-    //     //     ],
-    //     //     raw: true,
-    //     // });
+    //     // Get the  maximum ID value (most recent) of the most recent timeline table 
+    //     const maxId = await Timeline.findAll({
+    //         attributes: [
+    //             [db.sequelize.fn('MAX', db.sequelize.col('id')), 'id']
+    //         ],
+    //         raw: true,
+    //     });
 
-    //     // // Find the row associated with the Maximum ID
-    //     // const maxIdRow = await Timeline.findOne({
-    //     //     where: {
-    //     //         id: maxId[0].id,
-    //     //     }
-    //     // });
+    //     // Find the row associated with the Maximum ID
+    //     const maxIdRow = await Timeline.findOne({
+    //         where: {
+    //             id: maxId[0].id,
+    //         }
+    //     });
 
-    //     // if (maxIdRow) {
+    //     if (maxIdRow && maxIdRow.timeline != yesterday) {
+    //         await Timeline.destroy(
+    //             { where: { id: maxIdRow.id } }
+    //         );
 
-    //     //     const content = maxIdRow.timeline;
+    //         await createNotification();
+    //         await getAllNotifications();
 
-    //     //     processFile(content);
-    //     // }
+    //         Timeline.create({
+    //             timeline: timeline
+    //         });
+    //     }
 
-    //     // function processFile(content) {
+    //     async function createNotification() {
+    //         await Room.findAll().then(async (rooms) => {
 
-    //     //     if (content == timeline) {
-    //     //         // do Nothing
-    //     //         getAllNotifications();
-    //     //     } else {
-    //     //         createNotification();
+    //             rooms.forEach(async (room) => {
+    //                 try {
+    //                     if (room.available === false) {
 
-    //     //         Timeline.create({
-    //     //             timeline: previousTimeline
-    //     //         });
-    //     //     }
-    //     // }
+
+    //                         const endDate = room.end_date;
+    //                         const startDate = room.start_date;
+
+    //                         let expiryDate = new Date(endDate);
+    //                         // let beginDate = new Date(startDate);
+
+    //                         let currentDate = new Date();
+    //                         let todaysDate = new Date(currentDate);
+
+    //                         //calculate time difference  
+    //                         var current_time_difference = expiryDate.getTime() - todaysDate.getTime();
+    //                         //calculate days difference by dividing total milliseconds in a day  
+    //                         var remainingTime = current_time_difference / (1000 * 60 * 60 * 24);
+
+    //                         if (remainingTime <= 0) {
+
+    //                             // let expiry = successResponse(true, `This room's rent has expired `, null, res);
+    //                             let expiry = `${room.room_name}\'s rent has expired `;
+
+    //                             await Notification.create({
+    //                                 title: "Expired",
+    //                                 body: expiry,
+    //                                 roomId: room.id
+    //                             });
+
+    //                         } else if (remainingTime <= 14 && remainingTime > 0) {
+
+    //                             let expiry = `${room.room_name}\'s rent is expiring in 14 days`;
+
+    //                             await Notification.create({
+    //                                 title: "2 weeks notice",
+    //                                 body: expiry,
+    //                                 roomId: room.id
+    //                             });
+
+    //                         } else if (remainingTime <= 30 && remainingTime >= 14) {
+
+    //                             let expiry = `${room.room_name}\'s rent is expiring in 30 days`
+
+    //                             await Notification.create({
+    //                                 title: "1 month notice",
+    //                                 body: expiry,
+    //                                 roomId: room.id
+    //                             });
+    //                         }
+
+    //                     }
+
+    //                 } catch (err) {
+
+    //                     console.log(`inside error ${err}`);
+    //                 }
+
+    //             });
+
+
+    //         });
+
+    //         // return successResponse(true, "Notification Created Successfully", null, res);
+    //     }
+
+    //     async function getAllNotifications() {
+    //         let notificationObject;
+    //         let notificationBody;
+    //         let room;
+    //         let property;
+    //         let owner;
+    //         let tenant;
+    //         let notificationList = [];
+
+    //         await Notification.findAll({
+    //             attributes: ['id', 'title', 'body', 'roomId', 'completed', 'created_at', 'updated_at'],
+    //             raw: true
+
+    //         }).then(async (notifications) => {
+    //             for (let i = 0; i < notifications.length; i++) {
+    //                 notificationObject = {
+    //                     "id": 0,
+    //                     "notificationsTitle": "",
+    //                     "notificationsBody": "",
+    //                     "roomName": "",
+    //                     "tenantFirstName": "",
+    //                     "tenantLastName": "",
+    //                     "tenantPhone": "",
+    //                     "propertyAddress": "",
+    //                     "ownerName": "",
+    //                     "completed": false
+    //                 }
+
+    //                 if (notifications[i].title === "Expired") {
+    //                     notificationBody = `This room's rent has expired`
+    //                 } else if (notifications[i].title === "2 weeks notice") {
+    //                     notificationBody = `This room's rent is expiring in 14 days`
+    //                 } else {
+    //                     notificationBody = `This room's rent is expiring in 30 days`
+    //                 }
+
+
+    //                 notificationObject.id = notifications[i].id;
+    //                 notificationObject.notificationsTitle = notifications[i].title;
+    //                 notificationObject.notificationsBody = notificationBody;
+    //                 notificationObject.completed = notifications[i].completed;
+
+    //                 room = await Room.findOne({
+    //                     where: {
+    //                         id: notifications[i].roomId
+    //                     }
+
+    //                 }).then(async (room) => {
+    //                     notificationObject.roomName = room.dataValues.room_name;
+    //                     tenant = await Tenant.findOne({
+    //                         where: {
+    //                             id: room.dataValues.tenant_id
+    //                         }
+    //                     })
+    //                     notificationObject.tenantFirstName = tenant.dataValues.first_name;
+    //                     notificationObject.tenantLastName = tenant.dataValues.last_name;
+    //                     notificationObject.tenantPhone = tenant.dataValues.phone_number;
+
+    //                     property = await Property.findOne({
+    //                         where: {
+    //                             id: room.dataValues.propertyId
+    //                         }
+    //                     }).then(async (property) => {
+
+    //                         notificationObject.propertyAddress = property.dataValues.address
+    //                         owner = await Owner.findOne({
+    //                             where: {
+    //                                 id: property.dataValues.ownerId
+    //                             }
+    //                         });
+    //                         notificationObject.ownerName = owner.dataValues.name
+    //                     });
+
+    //                 })
+    //                 notificationList.push(notificationObject);
+    //             }
+
+    //             return successResponse(
+    //                 true,
+    //                 notificationList,
+    //                 null,
+    //                 res
+    //             );
+    //         }).catch(err => {
+    //             return errorResponse(
+    //                 false,
+    //                 'Something went wrong',
+    //                 err.toString(),
+    //                 500,
+    //                 res
+
+    //             );
+    //         });
+    //     }
+
     // }
 
 }
