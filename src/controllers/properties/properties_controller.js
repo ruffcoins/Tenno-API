@@ -5,6 +5,7 @@ const Property = db.properties;
 const Owner = db.owner;
 const Room = db.rooms;
 const { errorResponse, successResponse } = require('../../utils/responses');
+const { all } = require('../../routes/notifications/notifications_route');
 
 class PropertiesController {
     /** 
@@ -296,6 +297,63 @@ class PropertiesController {
             );
         })
     }
+
+    static async allPropertiesWithVacantRooms(req, res) {
+
+        try {
+            const allPropertiesWithVacantRooms = await Property.findAndCountAll({
+                include: [{
+                    model: Room,
+                    where: { available: 1 }
+                }]
+            });
+
+            return successResponse(
+                true,
+                allPropertiesWithVacantRooms,
+                null,
+                res
+            );
+
+        } catch (err) {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        }
+
+    }
+
+    static async getAllRooms(req, res) {
+
+        try {
+            const allRooms = await Room.findAndCountAll({
+                include: [{ model: Property }]
+            });
+
+            return successResponse(
+                true,
+                allRooms,
+                null,
+                res
+            );
+
+        } catch (err) {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        }
+
+    }
 }
 
 module.exports = {
@@ -306,5 +364,7 @@ module.exports = {
     getAvailablePropertyRooms: PropertiesController.getAvailablePropertyRooms,
     allPropertiesWithTheirOwners: PropertiesController.allPropertiesWithTheirOwners,
     allPropertiesWithTheirOwnersAndRooms: PropertiesController.allPropertiesWithTheirOwnersAndRooms,
-    searchProperties: PropertiesController.searchProperties
+    searchProperties: PropertiesController.searchProperties,
+    allPropertiesWithVacantRooms: PropertiesController.allPropertiesWithVacantRooms,
+    getAllRooms: PropertiesController.getAllRooms
 };

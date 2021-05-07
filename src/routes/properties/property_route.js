@@ -8,7 +8,9 @@ const {
     getAvailablePropertyRooms,
     allPropertiesWithTheirOwners,
     allPropertiesWithTheirOwnersAndRooms,
-    searchProperties
+    searchProperties,
+    allPropertiesWithVacantRooms,
+    getAllRooms
 } = require('../../controllers/properties/properties_controller');
 
 
@@ -20,6 +22,9 @@ router.get('/api/tenno/properties/getAvailablePropertyRooms', getAvailableProper
 router.get('/api/tenno/properties/allPropertiesWithTheirOwners', allPropertiesWithTheirOwners);
 router.get('/api/tenno/properties/allPropertiesWithTheirOwnersAndRooms', allPropertiesWithTheirOwnersAndRooms);
 router.get('/api/tenno/properties/search', searchProperties);
+router.get('/api/tenno/properties/allPropertiesWithVacantRooms', allPropertiesWithVacantRooms);
+router.get('/api/tenno/properties/allRooms', getAllRooms);
+
 
 module.exports = router;
 
