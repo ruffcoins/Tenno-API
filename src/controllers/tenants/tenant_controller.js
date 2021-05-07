@@ -6,7 +6,6 @@ const Owner = db.owner;
 const Room = db.rooms;
 const Tenant = db.tenant;
 const { errorResponse, successResponse } = require('../../utils/responses');
-const { request } = require('../../../app');
 const { tenant } = require('../../db/sequilize');
 const tenants = require('../../models/tenants');
 
