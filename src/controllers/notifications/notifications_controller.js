@@ -69,15 +69,14 @@ class NotificationsController {
 
         async function processFile(content) {
 
-
             if (content == timeline) {
-                // do Nothing
+
                 getAllNotifications();
             } else {
                 
                 await createNotification();
 
-                content = await Timeline.create({
+                await Timeline.create({
                     timeline: timeline
                 });
 
