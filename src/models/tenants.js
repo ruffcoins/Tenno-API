@@ -36,6 +36,18 @@ module.exports = (sequelize, Sequelize) =>{
         sex: {
             type: Sequelize.STRING
         },
+        email: {
+            type: Sequelize.STRING
+        },
+        state_of_origin: {
+            type: Sequelize.STRING
+        },
+        town: {
+            type: Sequelize.STRING
+        },
+        lga: {
+            type: Sequelize.STRING
+        },
         active: {
             type: Sequelize.BOOLEAN,
             allowNull: false,

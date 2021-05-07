@@ -24,7 +24,25 @@ module.exports = (sequelize, Sequelize) =>{
                 notNull: { msg: "phone is required" },
             },
             unique: true
-        }
+        },
+        address: {
+            type: Sequelize.STRING,
+        },
+        occupation: {
+            type: Sequelize.STRING
+        },
+        sex: {
+            type: Sequelize.STRING
+        },
+        state_of_origin: {
+            type: Sequelize.STRING
+        },
+        town: {
+            type: Sequelize.STRING
+        },
+        lga: {
+            type: Sequelize.STRING
+        },
     },{
         timestamps: true,
         freezeTableName: true,
