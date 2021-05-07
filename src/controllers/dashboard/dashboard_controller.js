@@ -35,6 +35,22 @@ class DashboardController {
             
         });
         const roomCount = roomList.count;
+
+        // Vacant Rooms
+        const vacantRoomList = await Room.findAndCountAll({
+            where: {
+                available: 1
+            }
+        });
+        const vacantRoomCount = vacantRoomList.count;
+
+        // occupied Rooms
+        const occupiedRoomList = await Room.findAndCountAll({
+            where: {
+                available: 0
+            }
+        });
+        const occupiedRoomCount = occupiedRoomList.count;
         
         // tenants
         const tenantList = await Tenant.findAndCountAll({
@@ -54,7 +70,7 @@ class DashboardController {
         });
         const expiringCount = expiringList.count;
 
-        return successResponse(true, { ownerCount, propertyCount, roomCount, tenantCount, noticeCount, expiringCount}, null, res)
+        return successResponse(true, { ownerCount, propertyCount, roomCount, tenantCount, noticeCount, expiringCount, vacantRoomCount, occupiedRoomCount}, null, res)
     }
 }
 
