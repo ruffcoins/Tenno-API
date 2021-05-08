@@ -12,7 +12,6 @@ class OwnerController {
         let offset = parseInt(req.query.skip);
 
         Owner.findAndCountAll({
-            attributes: ['id', 'name', 'phone'],
             limit: 10,
             offset: offset
         }).then(owners => {

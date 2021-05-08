@@ -15,7 +15,6 @@ class TenantController {
     static async getAllTenants(req, res) {
 
         await Tenant.findAll({
-            attributes: ['id', 'first_name', 'last_name', 'phone_number', 'occupation', 'marital_status', 'sex', 'active'],
             include: Room
         }).then(tenants => {
             return successResponse(
@@ -93,7 +92,7 @@ class TenantController {
                 nok_email: req.body.nok_email,
                 nok_address: req.body.nok_address,
                 nok_relationship: req.body.nok_relationship
-            
+
             }).then((tenant) => {
 
                 Room.update({
@@ -213,7 +212,7 @@ class TenantController {
                     );
                 });
             }
-            
+
             return successResponse(true, 'Tenant updated Successfully', null, res);
 
         } catch (error) {
