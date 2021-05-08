@@ -73,7 +73,7 @@ class NotificationsController {
 
                 getAllNotifications();
             } else {
-                
+
                 await createNotification();
 
                 await Timeline.create({
@@ -86,8 +86,6 @@ class NotificationsController {
                     firstRun = false;
                     processFile(content);
                 }
-                
-                // console.log(`This is the firstrun's value ${firstRun}`);
             }
         }
 
@@ -157,8 +155,6 @@ class NotificationsController {
 
 
             });
-
-            // return successResponse(true, "Notification Created Successfully", null, res);
         }
 
         async function getAllNotifications() {

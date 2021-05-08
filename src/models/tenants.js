@@ -1,9 +1,9 @@
-module.exports = (sequelize, Sequelize) =>{
+module.exports = (sequelize, Sequelize) => {
     return sequelize.define('tenants', {
-        id:{
+        id: {
             type: Sequelize.BIGINT(20),
             primaryKey: true,
-            autoIncrement:true
+            autoIncrement: true
         },
         createdAt: {
             field: 'created_at',
@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) =>{
             field: 'updated_at',
             type: Sequelize.DATE,
         },
-        first_name:{
+        first_name: {
             type: Sequelize.STRING
         },
         last_name: {
@@ -22,7 +22,7 @@ module.exports = (sequelize, Sequelize) =>{
         phone_number: {
             type: Sequelize.STRING,
             unique: true,
-            allowNull:false,
+            allowNull: false,
             validate: {
                 notNull: { msg: "phone_number is required" },
             },
@@ -48,12 +48,30 @@ module.exports = (sequelize, Sequelize) =>{
         lga: {
             type: Sequelize.STRING
         },
+        nok_first_name: {
+            type: Sequelize.STRING
+        },
+        nok_last_name: {
+            type: Sequelize.STRING
+        },
+        nok_phone_number: {
+            type: Sequelize.STRING
+        },
+        nok_email: {
+            type: Sequelize.STRING
+        },
+        nok_address: {
+            type: Sequelize.STRING
+        },
+        nok_relationship: {
+            type: Sequelize.STRING
+        },
         active: {
             type: Sequelize.BOOLEAN,
             allowNull: false,
             defaultValue: true
         }
-    },{
+    }, {
         timestamps: true,
         freezeTableName: true,
     })

@@ -38,7 +38,13 @@ class OwnerController {
         try {
             const owner = await Owner.create({
                 name: req.body.name,
-                phone: req.body.phone
+                phone: req.body.phone,
+                address: req.body.address,
+                occupation: req.body.occupation,
+                sex: req.body.sex,
+                state_of_origin: req.body.state_of_origin,
+                town: req.body.town,
+                lga: req.body.lga,
             });
             return successResponse(true, owner, null, res);
         } catch (err) {
@@ -82,7 +88,13 @@ class OwnerController {
         try {
             const owner = await Owner.update({
                 name: req.body.name,
-                phone: req.body.phone
+                phone: req.body.phone,
+                address: req.body.address,
+                occupation: req.body.occupation,
+                sex: req.body.sex,
+                state_of_origin: req.body.state_of_origin,
+                town: req.body.town,
+                lga: req.body.lga,
             },
                 { where: { id: req.params.id } }
             );

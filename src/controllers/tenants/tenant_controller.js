@@ -82,7 +82,18 @@ class TenantController {
                 phone_number: req.body.phone_number,
                 occupation: req.body.occupation,
                 marital_status: req.body.marital_status,
-                sex: req.body.sex
+                sex: req.body.sex,
+                email: req.body.email,
+                state_of_origin: req.body.state_of_origin,
+                town: req.body.town,
+                lga: req.body.lga,
+                nok_first_name: req.body.nok_first_name,
+                nok_last_name: req.body.nok_last_name,
+                nok_phone_number: req.body.nok_phone_number,
+                nok_email: req.body.nok_email,
+                nok_address: req.body.nok_address,
+                nok_relationship: req.body.nok_relationship
+            
             }).then((tenant) => {
 
                 Room.update({
@@ -173,8 +184,17 @@ class TenantController {
                         phone_number: req.body.phone_number,
                         occupation: req.body.occupation,
                         marital_status: req.body.marital_status,
-                        sex: req.body.sex
-                        
+                        sex: req.body.sex,
+                        email: req.body.email,
+                        state_of_origin: req.body.state_of_origin,
+                        town: req.body.town,
+                        lga: req.body.lga,
+                        nok_first_name: req.body.nok_first_name,
+                        nok_last_name: req.body.nok_last_name,
+                        nok_phone_number: req.body.nok_phone_number,
+                        nok_email: req.body.nok_email,
+                        nok_address: req.body.nok_address,
+                        nok_relationship: req.body.nok_relationship
                     }, {
 
                     where: { id: findTenant.id },
