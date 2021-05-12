@@ -47,6 +47,7 @@ class PropertiesController {
 
                 // After creating the property, create all the rooms attached to that property
                 let roomName = '';
+                let testRoom = '';
                 for (let i = 0; i < req.body.rooms.length; i++) {
                     roomArray.push(req.body.rooms[i]);
                 }
@@ -56,13 +57,14 @@ class PropertiesController {
                     for (let j = 0; j < roomArray[i].number; j++) {
                         if (!Number.isNaN(parseInt(roomArray[i].room_type.charAt(0), 10))) {
                             roomName = roomArray[i].room_type;
+                            testRoom = roomArray[i].room_type;
                         } else {
                             roomName = roomArray[i].room_type.charAt(0);
                         }
                         Room.create({
                             propertyId: property.id,
                             room_type: roomArray[i].room_type,
-                            room_name: `${roomName} (${j + 1})`
+                            room_name: `${testRoom} (room ${j + 1})`
 
                         });
                     }
