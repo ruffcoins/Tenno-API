@@ -42,7 +42,7 @@ db.notifications.belongsTo(db.rooms);
 db.notice.belongsTo(db.notifications);
 
 
-db.sequelize.sync();
+db.sequelize.sync({ force: true });
 // {force:true}
 db.sequelize
     .authenticate()
