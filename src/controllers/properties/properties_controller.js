@@ -57,12 +57,12 @@ class PropertiesController {
                         if (!Number.isNaN(parseInt(roomArray[i].room_type.charAt(0), 10))) {
                             roomName = roomArray[i].room_type;
                         } else {
-                            roomName = roomArray[i].room_type.charAt(0);
+                            roomName = roomArray[i].room_type;  
                         }
                         Room.create({
                             propertyId: property.id,
                             room_type: roomArray[i].room_type,
-                            room_name: `${roomName}room${j + 1}`
+                            room_name: `${roomName} (room${j + 1})`
 
                         });
                     }
