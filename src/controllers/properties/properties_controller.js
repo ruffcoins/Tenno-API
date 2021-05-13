@@ -62,7 +62,7 @@ class PropertiesController {
                         Room.create({
                             propertyId: property.id,
                             room_type: roomArray[i].room_type,
-                            room_name: `${roomName} (room${j + 1})`
+                            room_name: `${roomName} (room ${j + 1})`
 
                         });
                     }
