@@ -35,6 +35,25 @@ class OwnerController {
 
     static async create(req, res) {
         try {
+
+            //check if phone number already exists in the owners table
+            const existingOwner = await Owner.findOne({
+                where: {
+                    phone: req.body.phone
+                }
+            });
+
+            if (existingOwner) {
+                //return error response
+                return errorResponse( false, 'Phone number belongs to another Owner', null, 600, res);
+            }
+
+            // check if phone number request is empty
+            if (req.body.phone === '') {
+                return errorResponse(false, 'Phone number can not be empty', null, 601, res);
+            }
+
+
             const owner = await Owner.create({
                 name: req.body.name,
                 phone: req.body.phone,
@@ -46,16 +65,10 @@ class OwnerController {
                 lga: req.body.lga,
             });
             return successResponse(true, owner, null, res);
+
         } catch (err) {
-            if (err instanceof Sequelize.ValidationError) {
-                return errorResponse(
-                    false,
-                    'Duplicate phone number',
-                    err.errors[0].message,
-                    401,
-                    res
-                );
-            }
+            // return error response
+            return errorResponse( false, 'Something went wrong', err.toString(), 500, res);
         }
     }
 
@@ -97,6 +110,8 @@ class OwnerController {
             },
                 { where: { id: req.params.id } }
             );
+
+            // if owner does not exist
 
             if (owner[0] === 0) {
                 return successResponse(false, 'Owner does not exist', null, res);
