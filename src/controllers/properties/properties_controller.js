@@ -32,9 +32,26 @@ class PropertiesController {
                 }
             });
 
-
             if (!owner) {
                 return successResponse(false, 'Owner does not exist', null, res);
+            }
+
+
+            //check if address already exists in the properties table
+            const existingProperty = await Property.findOne({
+                where: {
+                    address: req.body.address
+                }
+            });
+
+            if (existingProperty) {
+                return successResponse(false, 'Address already exists', null, 600, res);
+            }
+            
+
+            // If address request is empty, throw an errow
+            if (req.body.address === '') {
+                return errorResponse(false, 'Address can not be empty', null, 601, res);
             }
 
             // If owner is found, create property using the owner id
@@ -68,29 +85,16 @@ class PropertiesController {
                     }
                 }
 
-                return successResponse(true, 'successful', null, res);
+                return successResponse(true, property, null, res);
             }).catch((err) => {
-                if (err instanceof Sequelize.ValidationError) {
-                    return errorResponse(
-                        false,
-                        'Duplicate property address',
-                        err.errors[0].message,
-                        401,
-                        res
-                    );
-                }
+                //throw error
+                return errorResponse(false, 'Something went wrong', err.toString(), 500, res);
             });
 
 
         } catch (error) {
-            return errorResponse(
-                false,
-                'Something went wrong',
-                err.toString(),
-                500,
-                res
-
-            );
+            // throwe error
+            return errorResponse(false, 'Something went wrong', error.toString(), 500, res);
         }
     }
 
