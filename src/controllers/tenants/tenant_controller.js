@@ -6,8 +6,6 @@ const Owner = db.owner;
 const Room = db.rooms;
 const Tenant = db.tenant;
 const { errorResponse, successResponse } = require('../../utils/responses');
-const { tenant } = require('../../db/sequilize');
-const tenants = require('../../models/tenants');
 
 class TenantController {
 
@@ -40,14 +38,26 @@ class TenantController {
 
         try {
 
+            // Check if phone number exists
+            const findTenant = await Tenant.findOne({
+                where: { phone_number: req.body.phone_number }
+            });
+
+            if (findTenant) {
+                return errorResponse(false, "Phone number already exists", null, 600, res);
+            }
+
+            // check if phone number request is empty
+            if (req.body.phone_number === '') {
+                return errorResponse(false, "Phone number can not be empty", null, 601, res);
+            }
+
             // Find an owner by phone number
             const owner = await Owner.findOne({
                 where: {
                     phone: req.body.phone
                 }
             });
-
-            // return successResponse(true, owner, null, res);
 
             if (!owner) {
                 return successResponse(false, 'Owner does not exist', null, res);
@@ -108,22 +118,14 @@ class TenantController {
 
                 return successResponse(true, 'Tenant created successfully', null, res);
             }).catch((err) => {
-                if (err instanceof Sequelize.ValidationError) {
-                    return errorResponse(
-                        false,
-                        'Duplicate phone number',
-                        err.errors[0].message,
-                        401,
-                        res
-                    );
-                }
+                return errorResponse(false, 'Something went wrong', err.toString(), 500, res);
             });
 
         } catch (err) {
             return errorResponse(
                 false,
                 'Something went wrong',
-                error.toString(),
+                err.toString(),
                 500,
                 res
 
