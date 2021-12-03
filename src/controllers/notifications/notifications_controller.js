@@ -7,286 +7,325 @@ const Owner = db.owner;
 const Notification = db.notifications;
 const Property = db.properties;
 const Notice = db.notice;
-const Timeline = db.timeline;
 const { errorResponse, successResponse } = require('../../utils/responses');
-const { raw } = require('body-parser');
-const { showProperty } = require('../properties/properties_controller');
+
+// New requirements
+const cron = require("node-cron");
+const notifier = require('node-notifier');
+
+const path = require('path');
 
 class NotificationsController {
 
-    static async showAllNotifications(req, res) {
+    // static async createNotification(req, res) {
 
-        //Create today and yesterday's date
-        let today = new Date();
-        let yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday = yesterday.toDateString();
+    //     try {
+    //         // create a cronjob to send notifications
 
-        // create a timeline
-        // The timeline is used to check the date stored in the timeline
-        // table against today's date. if the date doesn't match, look through
-        // the list ot get current expiring rooms, if it does match, just get all
-        // stored notifications
+    //         // run every day at 08:00:00, 12:00:00, 16:00:00, 20:00:00
+    //         // cron.schedule("0 8,12,16,20 * * *", async () => {
+            
+    //         // run cronjob every 10 seconds
+    //         cron.schedule("*/10 * * * * *", async () => {
+            
+    //             //get all rooms that have expiry dates less than 31 days but more than 14 days
+    //             const roomsExpiringIn30Days = await Room.findAll({
+    //                 where: {
+    //                     end_date: {
+    //                         [Sequelize.Op.lt]: new Date(new Date().setDate(new Date().getDate() + 31)),
+    //                         [Sequelize.Op.gt]: new Date(new Date().setDate(new Date().getDate() + 14))
+    //                     }
+    //                 }
+    //             });
 
-        let timeline = today.getFullYear() + " " + (today.getMonth() + 1) + " " + today.getDate();
+    //             //
+    //             // check if a 30-day notification already exists for each room in roomExpiringIn30Days list
+    //             //
+    //             roomsExpiringIn30Days.forEach(async element => {
+    //                 const existing30DaysNotification = await Notification.findOne({
+    //                     where: {
+    //                         roomId: element.id,
+    //                         title: "30-day notice"
+    //                     }
+    //                 });
 
-        //Count the rows in the timeline table
-        let noOfTimelines = await Timeline.findAll({
-            attributes: [[db.sequelize.fn('count', db.sequelize.col('id')), 'count']],
+    //                 // if there is no notification, create one
+    //                 if (!existing30DaysNotification) {
+    //                     const new30DaysNotification = await Notification.create({
+    //                         roomId: element.id,
+    //                         title: "30-day notice",
+    //                         body: `${element.room_name}'s rent will expire in 30 days`
+    //                     });
+
+    //                     // create a notification popup
+    //                     notifier.notify(
+    //                         {
+    //                             title: '30-day notice',
+    //                             message: `${element.room_name}'s rent will expire in 30 days`,
+    //                             icon: path.join(__dirname, 'assets/screen.png'), // Absolute path (doesn't work on balloons)
+    //                             sound: true, // Only Notification Center or Windows Toasters
+    //                             wait: true // Wait with callback, until user action is taken against notification, does not apply to Windows Toasters as they always wait or notify-send as it does not support the wait option
+    //                         },
+    //                         function (err, response, metadata) {
+    //                             // Response is response from notification
+    //                             // Metadata contains activationType, activationAt, deliveredAt
+    //                             console.log(err, response, metadata);
+    //                         }
+    //                     );
+    //                 }
+    //             });
+
+
+    //             //get all rooms that have expiry dates less than 15 days but more than 1 day
+    //             const roomsExpiringIn14Days = await Room.findAll({
+    //                 where: {
+    //                     end_date: {
+    //                         [Sequelize.Op.lt]: new Date(new Date().setDate(new Date().getDate() + 15)),
+    //                         [Sequelize.Op.gt]: new Date(new Date().setDate(new Date().getDate() + 1))
+    //                     }
+    //                 }
+    //             });
+
+    //             // check if a 14-day notification already exists for each room in roomsExpiringIn14Days list
+
+    //             roomsExpiringIn14Days.forEach(async element => {
+    //                 const existing14DaysNotification = await Notification.findOne({
+    //                     where: {
+    //                         roomId: element.id,
+    //                         title: "14-day notice"
+    //                     }
+    //                 });
+
+    //                 // if there is no notification, create one
+    //                 if (!existing14DaysNotification) {
+    //                     const new14DaysNotification = await Notification.create({
+    //                         roomId: element.id,
+    //                         title: "14-day notice",
+    //                         body: `${element.room_name}'s rent will expire in 14 days`
+    //                     });
+
+    //                     // create a notification popup
+    //                     notifier.notify(
+    //                         {
+    //                             title: '14-day notice',
+    //                             message: `${element.room_name}'s rent will expire in 14 days`,
+    //                             icon: path.join(__dirname, 'assets/screen.png'), // Absolute path (doesn't work on balloons)
+    //                             sound: true, // Only Notification Center or Windows Toasters
+    //                             wait: true // Wait with callback, until user action is taken against notification, does not apply to Windows Toasters as they always wait or notify-send as it does not support the wait option
+    //                         },
+    //                         function (err, response, metadata) {
+    //                             // Response is response from notification
+    //                             // Metadata contains activationType, activationAt, deliveredAt
+    //                             console.log(err, response, metadata);
+    //                         }
+    //                     );
+    //                 }
+    //             });
+
+    //             //get all rooms that have expired
+    //             const expiredRooms = await Room.findAll({
+    //                 where: {
+    //                     end_date: {
+    //                         [Sequelize.Op.lt]: new Date()
+    //                     }
+    //                 }
+    //             });
+
+    //             // check if an expiry notification already exists for each room in expired room list
+
+    //             expiredRooms.forEach(async element => {
+    //                 const expiredNotification = await Notification.findOne({
+    //                     where: {
+    //                         roomId: element.id,
+    //                         title: "Rent Expired"
+    //                     }
+    //                 });
+
+    //                 // if there is no notification, create one
+    //                 if (!expiredNotification) {
+    //                     const newExpiredNotification = await Notification.create({
+    //                         roomId: element.id,
+    //                         title: "Rent Expired",
+    //                         body: `${element.room_name}'s rent has expired` 
+    //                     });
+
+    //                     // create a notification popup
+    //                     notifier.notify(
+    //                         {
+    //                             title: 'Rent Expired',
+    //                             message: `${element.room_name}'s rent has expired`,
+    //                             icon: path.join(__dirname, 'assets/screen.png'), // Absolute path (doesn't work on balloons)
+    //                             sound: true, // Only Notification Center or Windows Toasters
+    //                             wait: true // Wait with callback, until user action is taken against notification, does not apply to Windows Toasters as they always wait or notify-send as it does not support the wait option
+    //                         },
+    //                         function (err, response, metadata) {
+    //                             // Response is response from notification
+    //                             // Metadata contains activationType, activationAt, deliveredAt
+    //                             console.log(err, response, metadata);
+    //                         }
+    //                     );
+    //                 }
+    //             });
+    //         });
+
+
+    //     } catch (e) {
+    //         // return error response
+    //         return errorResponse(
+    //             false,
+    //             'Something went wrong',
+    //             err.toString(),
+    //             500,
+    //             res
+    //         );
+    //     }
+    // }
+
+    static async getAllNotifications(req, res) {
+        let notificationObject;
+        let notificationBody;
+        let completedNotification;
+        let room;
+        let property;
+        let owner;
+        let tenant;
+        let notificationList = [];
+
+        await Notification.findAll({
+            attributes: ['id', 'title', 'body', 'roomId', 'completed', 'created_at', 'updated_at'],
             raw: true
-        });
 
-        //if theres no row, create one and put yesterday's date in it
-        if (noOfTimelines[0].count == 0) {
-            await Timeline.create({
-                timeline: yesterday
-            });
-        }
-
-        //Get the  maximum ID value (most recent) of the most recent timeline table 
-        const maxId = await Timeline.findAll({
-            attributes: [
-                [db.sequelize.fn('MAX', db.sequelize.col('id')), 'id']
-            ],
-            raw: true,
-        });
-
-        // Find the row associated with the Maximum ID
-        const maxIdRow = await Timeline.findOne({
-            where: {
-                id: maxId[0].id,
-            }
-        });
-
-        let firstRun = true;
-
-        if (maxIdRow) {
-
-            const content = maxIdRow.timeline;
-
-            processFile(content);
-        }
-
-        async function processFile(content) {
-
-            if (content == timeline) {
-
-                getAllNotifications();
-            } else {
-
-                await createNotification();
-
-                await Timeline.create({
-                    timeline: timeline
-                });
-
-                await getAllNotifications();
-
-                if (firstRun == true) {
-                    firstRun = false;
-                    processFile(content);
+        }).then(async (notifications) => {
+            for (let i = 0; i < notifications.length; i++) {
+                notificationObject = {
+                    "id": 0,
+                    "notificationsTitle": "",
+                    "notificationsBody": "",
+                    "roomName": "",
+                    "tenantFirstName": "",
+                    "tenantLastName": "",
+                    "tenantPhone": "",
+                    "propertyAddress": "",
+                    "ownerName": "",
+                    "completed": false,
+                    "url": "127.0.0.1:3000/api/tenno/tenant/room/show/" + notifications[i].roomId
                 }
-            }
-        }
 
+                if (notifications[i].completed == 0) {
+                    completedNotification = false
+                } else {
+                    completedNotification = true
+                }
 
-        async function createNotification() {
-            await Room.findAll().then(async (rooms) => {
+                if (notifications[i].title === "Rent Expired") {
+                    notificationBody = `This room's rent has expired`
+                } else if (notifications[i].title === "14-day notice") {
+                    notificationBody = `This room's rent is expiring in 14 days`
+                } else {
+                    notificationBody = `This room's rent is expiring in 30 days`
+                }
 
-                rooms.forEach(async (room) => {
-                    try {
-                        if (room.available === false) {
+                notificationObject.id = notifications[i].id;
+                notificationObject.notificationsTitle = notifications[i].title;
+                notificationObject.notificationsBody = notificationBody;
+                notificationObject.completed = completedNotification;
 
-
-                            const endDate = room.end_date;
-                            const startDate = room.start_date;
-
-                            let expiryDate = new Date(endDate);
-                            // let beginDate = new Date(startDate);
-
-                            let currentDate = new Date();
-                            let todaysDate = new Date(currentDate);
-
-                            //calculate time difference  
-                            var current_time_difference = expiryDate.getTime() - todaysDate.getTime();
-                            //calculate days difference by dividing total milliseconds in a day  
-                            var remainingTime = current_time_difference / (1000 * 60 * 60 * 24);
-
-                            if (remainingTime <= 0) {
-
-                                // let expiry = successResponse(true, `This room's rent has expired `, null, res);
-                                let expiry = `${room.room_name}\'s rent has expired `;
-
-                                await Notification.create({
-                                    title: "Expired",
-                                    body: expiry,
-                                    roomId: room.id
-                                });
-
-                            } else if (remainingTime <= 14 && remainingTime > 0) {
-
-                                let expiry = `${room.room_name}\'s rent is expiring in 14 days`;
-
-                                await Notification.create({
-                                    title: "2 weeks notice",
-                                    body: expiry,
-                                    roomId: room.id
-                                });
-
-                            } else if (remainingTime <= 30 && remainingTime >= 14) {
-
-                                let expiry = `${room.room_name}\'s rent is expiring in 30 days`
-
-                                await Notification.create({
-                                    title: "1 month notice",
-                                    body: expiry,
-                                    roomId: room.id
-                                });
-                            }
-
-                        }
-
-                    } catch (err) {
-
-                        console.log(`inside error ${err}`);
+                room = await Room.findOne({
+                    where: {
+                        id: notifications[i].roomId
                     }
 
-                });
-
-
-            });
-        }
-
-        async function getAllNotifications() {
-            let notificationObject;
-            let notificationBody;
-            let completedNotification;
-            let room;
-            let property;
-            let owner;
-            let tenant;
-            let notificationList = [];
-
-            await Notification.findAll({
-                attributes: ['id', 'title', 'body', 'roomId', 'completed', 'created_at', 'updated_at'],
-                raw: true
-
-            }).then(async (notifications) => {
-                for (let i = 0; i < notifications.length; i++) {
-                    notificationObject = {
-                        "id": 0,
-                        "notificationsTitle": "",
-                        "notificationsBody": "",
-                        "roomName": "",
-                        "tenantFirstName": "",
-                        "tenantLastName": "",
-                        "tenantPhone": "",
-                        "propertyAddress": "",
-                        "ownerName": "",
-                        "completed": false
-                    }
-
-                    if (notifications[i].completed == 0) {
-                        completedNotification = false
-                    } else {
-                        completedNotification = true
-                    }
-
-                    if (notifications[i].title === "Expired") {
-                        notificationBody = `This room's rent has expired`
-                    } else if (notifications[i].title === "2 weeks notice") {
-                        notificationBody = `This room's rent is expiring in 14 days`
-                    } else {
-                        notificationBody = `This room's rent is expiring in 30 days`
-                    }
-
-                    notificationObject.id = notifications[i].id;
-                    notificationObject.notificationsTitle = notifications[i].title;
-                    notificationObject.notificationsBody = notificationBody;
-                    notificationObject.completed = completedNotification;
-
-                    room = await Room.findOne({
+                }).then(async (room) => {
+                    notificationObject.roomName = room.dataValues.room_name;
+                    tenant = await Tenant.findOne({
                         where: {
-                            id: notifications[i].roomId
+                            id: room.dataValues.tenant_id
                         }
-
-                    }).then(async (room) => {
-                        notificationObject.roomName = room.dataValues.room_name;
-                        tenant = await Tenant.findOne({
-                            where: {
-                                id: room.dataValues.tenant_id
-                            }
-                        })
-                        notificationObject.tenantFirstName = tenant.dataValues.first_name;
-                        notificationObject.tenantLastName = tenant.dataValues.last_name;
-                        notificationObject.tenantPhone = tenant.dataValues.phone_number;
-
-                        property = await Property.findOne({
-                            where: {
-                                id: room.dataValues.propertyId
-                            }
-                        }).then(async (property) => {
-
-                            notificationObject.propertyAddress = property.dataValues.address
-                            owner = await Owner.findOne({
-                                where: {
-                                    id: property.dataValues.ownerId
-                                }
-                            });
-                            notificationObject.ownerName = owner.dataValues.name
-                        });
-
                     })
-                    notificationList.push(notificationObject);
-                }
+                    notificationObject.tenantFirstName = tenant.dataValues.first_name;
+                    notificationObject.tenantLastName = tenant.dataValues.last_name;
+                    notificationObject.tenantPhone = tenant.dataValues.phone_number;
 
-                return successResponse(
-                    true,
-                    notificationList,
-                    null,
-                    res
-                );
-            }).catch(err => {
-                return errorResponse(
-                    false,
-                    'Something went wrong',
-                    err.toString(),
-                    500,
-                    res
+                    property = await Property.findOne({
+                        where: {
+                            id: room.dataValues.propertyId
+                        }
+                    }).then(async (property) => {
 
-                );
-            });
-        }
+                        notificationObject.propertyAddress = property.dataValues.address
+                        owner = await Owner.findOne({
+                            where: {
+                                id: property.dataValues.ownerId
+                            }
+                        });
+                        notificationObject.ownerName = owner.dataValues.name
+                    });
+
+                })
+                notificationList.push(notificationObject);
+            }
+
+            return successResponse(
+                true,
+                notificationList,
+                null,
+                res
+            );
+        }).catch(err => {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        });
     }
-
 
     static async updateNotification(req, res) {
         try {
-
-            const findNotification = await Notification.findOne({
+            const notificationtoUpdate = await Notification.findOne({
                 where: {
-                    id: req.params.id
+                    id: req.params.id,
                 }
             });
 
-            if (findNotification) {
-                Notification.update({
-                    completed: true
-                },
-                    { where: { id: req.params.id } }
+            if (!notificationtoUpdate) {
+                return errorResponse(
+                    false, 'Notification not found', 'Notification not found', 404, res
+                );
+            }
 
-                ).then(async (notification) => {
+            if (notificationtoUpdate) {
+                // check if notification is completed
 
-                    await Notice.create(
-                        {
-                            title: findNotification.title,
-                            notificationId: findNotification.id
-                        }
+                try {
+                    if (notificationtoUpdate.completed === false) {
+                        // update notification status to completed
+                        console.log(notificationtoUpdate);
+
+                        await notificationtoUpdate.update({
+                            completed: true
+                        });
+                        // return success response
+                        return successResponse(true, 'Notification updated Successfully', null, res);
+
+                    }
+
+                    if (notificationtoUpdate.completed === true) {
+                        // update notification status to completed
+                        return successResponse(
+                            true, 'Notification has already been attended to', null, res // return success response
+                        );
+                    }
+                    
+                }
+                catch (err) {
+                    return errorResponse(
+                        false, 'Something went wrong', err.toString(), 500, res
                     );
-                });
-                return successResponse(true, 'Notification updated successfully', null, res);
-            } else {
-                return successResponse(false, 'Notification does not exist', null, res);
+                }
             }
 
         } catch (err) {
@@ -300,10 +339,254 @@ class NotificationsController {
         }
     }
 
+    static async showAllCompletedNotifications(req, res) {
+
+        let notificationObject;
+        let notificationBody;
+        let completedNotification;
+        let room;
+        let property;
+        let owner;
+        let tenant;
+        let notificationList = [];
+
+        await Notification.findAll({
+            attributes: ['id', 'title', 'body', 'roomId', 'completed', 'created_at', 'updated_at'],
+            where: {
+                completed: true
+            },
+            raw: true
+
+        }).then(async (notifications) => {
+            for (let i = 0; i < notifications.length; i++) {
+                notificationObject = {
+                    "id": 0,
+                    "notificationsTitle": "",
+                    "notificationsBody": "",
+                    "roomName": "",
+                    "tenantFirstName": "",
+                    "tenantLastName": "",
+                    "tenantPhone": "",
+                    "propertyAddress": "",
+                    "ownerName": "",
+                    "completed": false
+                }
+
+                if (notifications[i].completed == 0) {
+                    completedNotification = false
+                } else {
+                    completedNotification = true
+                }
+
+                if (notifications[i].title === "Rent Expired") {
+                    notificationBody = `This room's rent has expired`
+                } else if (notifications[i].title === "14-day notice") {
+                    notificationBody = `This room's rent is expiring in 14 days`
+                } else {
+                    notificationBody = `This room's rent is expiring in 30 days`
+                }
+
+                notificationObject.id = notifications[i].id;
+                notificationObject.notificationsTitle = notifications[i].title;
+                notificationObject.notificationsBody = notificationBody;
+                notificationObject.completed = completedNotification;
+
+                room = await Room.findOne({
+                    where: {
+                        id: notifications[i].roomId
+                    }
+
+                }).then(async (room) => {
+                    notificationObject.roomName = room.dataValues.room_name;
+                    tenant = await Tenant.findOne({
+                        where: {
+                            id: room.dataValues.tenant_id
+                        }
+                    })
+                    notificationObject.tenantFirstName = tenant.dataValues.first_name;
+                    notificationObject.tenantLastName = tenant.dataValues.last_name;
+                    notificationObject.tenantPhone = tenant.dataValues.phone_number;
+
+                    property = await Property.findOne({
+                        where: {
+                            id: room.dataValues.propertyId
+                        }
+                    }).then(async (property) => {
+
+                        notificationObject.propertyAddress = property.dataValues.address
+                        owner = await Owner.findOne({
+                            where: {
+                                id: property.dataValues.ownerId
+                            }
+                        });
+                        notificationObject.ownerName = owner.dataValues.name
+                    });
+
+                })
+                notificationList.push(notificationObject);
+            }
+
+            return successResponse(
+                true,
+                notificationList,
+                null,
+                res
+            );
+        }).catch(err => {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        });
+
+    }
+
+    static async showIncompleteNotifications(req, res) {
+
+        let notificationObject;
+        let notificationBody;
+        let completedNotification;
+        let room;
+        let property;
+        let owner;
+        let tenant;
+        let notificationList = [];
+
+        await Notification.findAll({
+            attributes: ['id', 'title', 'body', 'roomId', 'completed', 'created_at', 'updated_at'],
+            where: {
+                completed: false
+            },
+            raw: true
+
+        }).then(async (notifications) => {
+            for (let i = 0; i < notifications.length; i++) {
+                notificationObject = {
+                    "id": 0,
+                    "notificationsTitle": "",
+                    "notificationsBody": "",
+                    "roomName": "",
+                    "tenantFirstName": "",
+                    "tenantLastName": "",
+                    "tenantPhone": "",
+                    "propertyAddress": "",
+                    "ownerName": "",
+                    "completed": false,
+                    "url": "127.0.0.1:3000/api/tenno/tenant/room/show/" + notifications[i].roomId
+
+                }
+
+                if (notifications[i].completed == 0) {
+                    completedNotification = false
+                } else {
+                    completedNotification = true
+                }
+
+                if (notifications[i].title === "Rent Expired") {
+                    notificationBody = `This room's rent has expired`
+                } else if (notifications[i].title === "14-day notice") {
+                    notificationBody = `This room's rent is expiring in 14 days`
+                } else {
+                    notificationBody = `This room's rent is expiring in 30 days`
+                }
+
+                notificationObject.id = notifications[i].id;
+                notificationObject.notificationsTitle = notifications[i].title;
+                notificationObject.notificationsBody = notificationBody;
+                notificationObject.completed = completedNotification;
+
+                room = await Room.findOne({
+                    where: {
+                        id: notifications[i].roomId
+                    }
+
+                }).then(async (room) => {
+                    notificationObject.roomName = room.dataValues.room_name;
+                    tenant = await Tenant.findOne({
+                        where: {
+                            id: room.dataValues.tenant_id
+                        }
+                    })
+                    notificationObject.tenantFirstName = tenant.dataValues.first_name;
+                    notificationObject.tenantLastName = tenant.dataValues.last_name;
+                    notificationObject.tenantPhone = tenant.dataValues.phone_number;
+
+                    property = await Property.findOne({
+                        where: {
+                            id: room.dataValues.propertyId
+                        }
+                    }).then(async (property) => {
+
+                        notificationObject.propertyAddress = property.dataValues.address
+                        owner = await Owner.findOne({
+                            where: {
+                                id: property.dataValues.ownerId
+                            }
+                        });
+                        notificationObject.ownerName = owner.dataValues.name
+                    });
+
+                })
+                notificationList.push(notificationObject);
+            }
+
+            return successResponse(
+                true,
+                notificationList,
+                null,
+                res
+            );
+        }).catch(err => {
+            return errorResponse(
+                false,
+                'Something went wrong',
+                err.toString(),
+                500,
+                res
+
+            );
+        });
+
+    }
+
+    // static async viewSingleNotification(req, res) {
+    //     // get notification id
+    //     let notificationId = req.params.id;
+
+    //     // find notification
+    //     await Notification.findOne({
+    //         where: {
+    //             id: notificationId
+    //         }
+    //     }).then(async (notification) => {
+    //         if (notification) {
+
+    //             await Room.findOne({
+    //                 where: {
+    //                     id: notification.roomId
+    //                 }
+    //             }).then(async (room) => {
+
+    //                 await Tenant.findOne({
+    //                     where: {
+    //                         id: room.tenant_id
+    //                     }
+    //                 })
+    //             })
+    //         }
+    //     }
+    // )}
 }
 
 module.exports = {
-    showAllNotifications: NotificationsController.showAllNotifications,
+    showAllCompletedNotifications: NotificationsController.showAllCompletedNotifications,
     updateNotification: NotificationsController.updateNotification,
-    // refreshNotification: NotificationsController.refreshNotification
+    createNotification: NotificationsController.createNotification,
+    getAllNotifications: NotificationsController.getAllNotifications,
+    showIncompleteNotifications: NotificationsController.showIncompleteNotifications,
+
 };
