@@ -17,8 +17,7 @@ module.exports = (sequelize, Sequelize) =>{
             type: Sequelize.STRING
         },
         body: {
-            type: Sequelize.STRING,
-            unique: true,
+            type: Sequelize.STRING
         },
         completed: {
             type: Sequelize.BOOLEAN,
