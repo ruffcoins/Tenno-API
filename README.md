@@ -5,7 +5,7 @@ Tenno API
 Tenno is a desktop solution that help property owners, caretakers and estate managers manage tenancy in any number of properties.
 
 # Getting Started
-You can find the complete documentation of the [Fyngram API here](https://documenter.getpostman.com/view/9080206/TW76BixQ).
+You can find the complete documentation of the [Tenno API here](https://documenter.getpostman.com/view/9080206/TW76BixQ).
 
 You can fork or clone the repository to start using the API
 
